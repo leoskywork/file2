@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace File2
@@ -19,7 +20,7 @@ namespace File2
         {
             //todo init language by system culture
             _language = new LanguageEnglish("en");
-            this.labelAggregateError.Text = null;
+            this.labelAggregateMessage.Text = null;
             this.folderBrowserDialogMain.ShowNewFolderButton = true;
             this.folderBrowserDialogMain.RootFolder = Environment.SpecialFolder.MyComputer;
         }
@@ -30,6 +31,7 @@ namespace File2
             {
                 this.buttonAggregateGo.Enabled = true;
                 this.textBoxAggregateSource.Text = this.folderBrowserDialogMain.SelectedPath;
+                this.labelAggregateMessage.Text = null;
                 SetDefaultAggregateTarget();
             }
         }
@@ -40,6 +42,7 @@ namespace File2
             {
                 this.buttonAggregateGo.Enabled = true;
                 this.textBoxAggregateTarget.Text = this.folderBrowserDialogMain.SelectedPath;
+                this.labelAggregateMessage.Text = null;
                 _AggregateTargetSetByUser = true;
             }
         }
@@ -52,25 +55,25 @@ namespace File2
 
                 if (string.IsNullOrWhiteSpace(this.textBoxAggregateSource.Text))
                 {
-                    this.labelAggregateError.Text = "Please select a source folder";
+                    this.labelAggregateMessage.Text = "Please select a source folder";
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(this.textBoxAggregateTarget.Text))
                 {
-                    this.labelAggregateError.Text = "Please select a targe folder";
+                    this.labelAggregateMessage.Text = "Please select a targe folder";
                     return;
                 }
 
                 if (!Directory.Exists(this.textBoxAggregateSource.Text))
                 {
-                    this.labelAggregateError.Text = "Invalid source folder";
+                    this.labelAggregateMessage.Text = "Invalid source folder";
                     return;
                 }
 
                 if (!Directory.Exists(this.textBoxAggregateTarget.Text))
                 {
-                    this.labelAggregateError.Text = "Invalid target folder";
+                    this.labelAggregateMessage.Text = "Invalid target folder";
                     return;
                 }
 
@@ -96,15 +99,43 @@ namespace File2
                     }
                 }
 
-                this.labelAggregateError.Text = "Moving...";
-                string message = AggregateFile(this.textBoxAggregateSource.Text, this.textBoxAggregateTarget.Text);
-                this.labelAggregateError.Text = message;
-                this.buttonAggregateGo.Enabled = true;
+                this.labelAggregateMessage.Text = "Moving...";
+                this.groupBoxAggregate.Enabled = false;
+
+                var task = new Task<string>(() =>
+                {
+                    string message = AggregateFile(this.textBoxAggregateSource.Text, this.textBoxAggregateTarget.Text,
+                   (progressInfo) => UpdateProgressMessage(progressInfo));
+                    return message;
+                });
+
+                task.ContinueWith((_) =>
+                {
+                    this.labelAggregateMessage.Text = task.Result;
+                    this.groupBoxAggregate.Enabled = true;
+                    this.buttonAggregateGo.Enabled = true;
+                }, TaskScheduler.FromCurrentSynchronizationContext());
+
+                task.Start();
+
             }
             catch (Exception ex)
             {
-                this.labelAggregateError.Text = "Ooops! " + ex.Message;
+                this.labelAggregateMessage.Text = "Ooops! " + ex.Message;
+                this.groupBoxAggregate.Enabled = true;
                 this.buttonAggregateGo.Enabled = true;
+            }
+        }
+
+        private void UpdateProgressMessage(string progressInfo)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action<string>(UpdateProgressMessage), progressInfo);
+            }
+            else
+            {
+                this.labelAggregateMessage.Text = progressInfo;
             }
         }
 
@@ -112,6 +143,7 @@ namespace File2
         {
             if (!string.IsNullOrWhiteSpace(this.textBoxAggregateSource.Text))
             {
+                this.labelAggregateMessage.Text = null;
                 this.SetDefaultAggregateTarget();
             }
             else
@@ -129,6 +161,7 @@ namespace File2
         }
 
 
+
         private void SetDefaultAggregateTarget()
         {
             if (!_AggregateTargetSetByUser)
@@ -137,18 +170,24 @@ namespace File2
             }
         }
 
-        private string AggregateFile(string source, string target)
+        private string AggregateFile(string sourceFolder, string targetFolder, Action<string> progress)
         {
             int filesMoved = 0;
             int filesMoveFiled = 0;
             int filesSkipped = 0;
+            int maxFileNameLength = 30;
 
-            var files = Directory.EnumerateFiles(source, "*.*", SearchOption.AllDirectories).ToList();
+            var files = Directory.EnumerateFiles(sourceFolder, "*.*", SearchOption.AllDirectories).ToList();
             files.Sort();
 
             foreach (var file in files)
             {
-                string targetFile = Path.Combine(target, Path.GetFileName(file));
+                var count = filesMoved + filesMoveFiled + filesSkipped;
+                var name = Path.GetFileName(file);
+                var nameInfo = name.Length > maxFileNameLength ? name.Substring(0, maxFileNameLength) : name;
+                progress($"moving {count + 1}/{files.Count} ({nameInfo})...");
+                string targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
+
                 if (File.Exists(targetFile))
                 {
                     filesSkipped++;
@@ -167,7 +206,7 @@ namespace File2
                 }
             }
 
-            return $"Files moved: {filesMoved}, failed: {filesMoveFiled}, skipped: {filesSkipped}";
+            return $"Files moved: {filesMoved}{(filesMoveFiled > 0 ? ", failed: " + filesMoveFiled : "")}{(filesSkipped > 0 ? ", files skipped: " + filesSkipped : "")}";
         }
 
     }

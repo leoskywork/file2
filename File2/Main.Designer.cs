@@ -32,7 +32,7 @@
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageMain = new System.Windows.Forms.TabPage();
             this.groupBoxAggregate = new System.Windows.Forms.GroupBox();
-            this.labelAggregateError = new System.Windows.Forms.Label();
+            this.labelAggregateMessage = new System.Windows.Forms.Label();
             this.buttonAggregateGo = new System.Windows.Forms.Button();
             this.buttonAggregateTarget = new System.Windows.Forms.Button();
             this.buttonAggregateSource = new System.Windows.Forms.Button();
@@ -69,7 +69,7 @@
             // 
             // groupBoxAggregate
             // 
-            this.groupBoxAggregate.Controls.Add(this.labelAggregateError);
+            this.groupBoxAggregate.Controls.Add(this.labelAggregateMessage);
             this.groupBoxAggregate.Controls.Add(this.buttonAggregateGo);
             this.groupBoxAggregate.Controls.Add(this.buttonAggregateTarget);
             this.groupBoxAggregate.Controls.Add(this.buttonAggregateSource);
@@ -85,14 +85,14 @@
             // 
             // labelAggregateError
             // 
-            this.labelAggregateError.AutoSize = true;
-            this.labelAggregateError.Font = new System.Drawing.Font("SimSun", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.labelAggregateError.ForeColor = System.Drawing.Color.Red;
-            this.labelAggregateError.Location = new System.Drawing.Point(2, 102);
-            this.labelAggregateError.Name = "labelAggregateError";
-            this.labelAggregateError.Size = new System.Drawing.Size(163, 19);
-            this.labelAggregateError.TabIndex = 5;
-            this.labelAggregateError.Text = "Invalid source";
+            this.labelAggregateMessage.AutoSize = true;
+            this.labelAggregateMessage.Font = new System.Drawing.Font("SimSun", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelAggregateMessage.ForeColor = System.Drawing.Color.Red;
+            this.labelAggregateMessage.Location = new System.Drawing.Point(2, 102);
+            this.labelAggregateMessage.Name = "labelAggregateError";
+            this.labelAggregateMessage.Size = new System.Drawing.Size(163, 19);
+            this.labelAggregateMessage.TabIndex = 5;
+            this.labelAggregateMessage.Text = "Invalid source";
             // 
             // buttonAggregateGo
             // 
@@ -189,7 +189,7 @@
         private System.Windows.Forms.Button buttonAggregateSource;
         private System.Windows.Forms.TextBox textBoxAggregateTarget;
         private System.Windows.Forms.TextBox textBoxAggregateSource;
-        private System.Windows.Forms.Label labelAggregateError;
+        private System.Windows.Forms.Label labelAggregateMessage;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialogMain;
     }
 }
