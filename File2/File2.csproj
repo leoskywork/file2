@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="FileTool.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>

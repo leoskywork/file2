@@ -11,6 +11,7 @@ namespace File2
         private ILanguage _language;
         private bool _SyncAggregateSourceWithTarget = true;
         private bool _AggregateTargetChangedByAutoSync = false;
+        private FileTool _FileTool = new FileTool();
 
         public Main()
         {
@@ -101,12 +102,11 @@ namespace File2
                     }
                 }
 
-                this.labelAggregateMessage.Text = "Moving...";
                 this.groupBoxAggregate.Enabled = false;
                 var source = this.textBoxAggregateSource.Text;
                 var target = this.textBoxAggregateTarget.Text;
 
-                var task = new Task<string>(() => AggregateFile(source, target, (message) => UpdateProgressMessage(message)));
+                var task = new Task<string>(() => _FileTool.AggregateFile(source, target, (message) => UpdateProgressMessage(message)));
 
                 task.ContinueWith((_) =>
                 {
@@ -123,18 +123,6 @@ namespace File2
                 this.labelAggregateMessage.Text = "Ooops! " + ex.Message;
                 this.groupBoxAggregate.Enabled = true;
                 this.buttonAggregateGo.Enabled = true;
-            }
-        }
-
-        private void UpdateProgressMessage(string progressInfo)
-        {
-            if (this.InvokeRequired)
-            {
-                this.BeginInvoke(new Action<string>(UpdateProgressMessage), progressInfo);
-            }
-            else
-            {
-                this.labelAggregateMessage.Text = progressInfo;
             }
         }
 
@@ -167,60 +155,16 @@ namespace File2
             }
         }
 
-        private string AggregateFile(string sourceFolder, string targetFolder, Action<string> progress)
+        private void UpdateProgressMessage(string progressInfo)
         {
-            int filesMoved = 0;
-            int filesMoveFiled = 0;
-            int filesSkipped = 0;
-            int maxFileNameLength = 28;
-
-            var files = Directory.EnumerateFiles(sourceFolder, "*.*", SearchOption.AllDirectories).ToList();
-            files.Sort();
-
-            foreach (var file in files)
+            if (this.InvokeRequired)
             {
-                System.Diagnostics.Debug.WriteLine("---> moving " + file);
-                var count = filesMoved + filesMoveFiled + filesSkipped;
-                var name = Path.GetFileName(file);
-                var nameInfo = name.Length > maxFileNameLength ? name.Substring(0, maxFileNameLength) : name;
-                progress($"moving {count + 1}/{files.Count} {(new FileInfo(file)).Length.ToFriendlyFileSize()} ({nameInfo})...");
-                //progress($"moving 999/999 {(new FileInfo(file)).Length.ToFriendlyFileSize()} ({nameInfo})...");
-                string targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
-
-                if (File.Exists(targetFile))
-                {
-                    if (file == targetFile)
-                    {
-                        filesSkipped++;
-                    }
-                    //override file if they have same name and size, otherwise skip
-                    else if ((new FileInfo(file)).Length == (new FileInfo(targetFile)).Length)
-                    {
-                        File.Delete(targetFile);
-                        File.Move(file, targetFile);
-                        filesMoved++;
-                    }
-                    else
-                    {
-                        filesSkipped++;
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        File.Move(file, targetFile);
-                        filesMoved++;
-                    }
-                    catch (Exception)
-                    {
-                        filesMoveFiled++;
-                    }
-                }
-                System.Diagnostics.Debug.WriteLine("---> done or skip " + file);
+                this.BeginInvoke(new Action<string>(UpdateProgressMessage), progressInfo);
             }
-
-            return $"Files moved: {filesMoved}{(filesMoveFiled > 0 ? ", failed: " + filesMoveFiled : "")}{(filesSkipped > 0 ? ", files skipped: " + filesSkipped : "")}";
+            else
+            {
+                this.labelAggregateMessage.Text = progressInfo;
+            }
         }
 
     }
