@@ -9,7 +9,8 @@ namespace File2
     public partial class Main : Form
     {
         private ILanguage _language;
-        private bool _AggregateTargetSetByUser = false;
+        private bool _SyncAggregateSourceWithTarget = true;
+        private bool _AggregateTargetChangedByAutoSync = false;
 
         public Main()
         {
@@ -44,7 +45,7 @@ namespace File2
                 this.buttonAggregateGo.Enabled = true;
                 this.textBoxAggregateTarget.Text = this.folderBrowserDialogMain.SelectedPath;
                 this.labelAggregateMessage.Text = null;
-                _AggregateTargetSetByUser = true;
+                _SyncAggregateSourceWithTarget = false;
             }
         }
 
@@ -68,13 +69,13 @@ namespace File2
 
                 if (!Directory.Exists(this.textBoxAggregateSource.Text))
                 {
-                    this.labelAggregateMessage.Text = "Invalid source folder";
+                    this.labelAggregateMessage.Text = "Source folder not exist";
                     return;
                 }
 
                 if (!Directory.Exists(this.textBoxAggregateTarget.Text))
                 {
-                    this.labelAggregateMessage.Text = "Invalid target folder";
+                    this.labelAggregateMessage.Text = "Target folder not exist";
                     return;
                 }
 
@@ -102,13 +103,10 @@ namespace File2
 
                 this.labelAggregateMessage.Text = "Moving...";
                 this.groupBoxAggregate.Enabled = false;
+                var source = this.textBoxAggregateSource.Text;
+                var target = this.textBoxAggregateTarget.Text;
 
-                var task = new Task<string>(() =>
-                {
-                    string message = AggregateFile(this.textBoxAggregateSource.Text, this.textBoxAggregateTarget.Text,
-                   (progressInfo) => UpdateProgressMessage(progressInfo));
-                    return message;
-                });
+                var task = new Task<string>(() => AggregateFile(source, target, (message) => UpdateProgressMessage(message)));
 
                 task.ContinueWith((_) =>
                 {
@@ -144,23 +142,16 @@ namespace File2
         {
             this.labelAggregateMessage.Text = null;
             this.SetDefaultAggregateTarget();
-
-            if (string.IsNullOrWhiteSpace(this.textBoxAggregateSource.Text))
-            {
-                this.buttonAggregateGo.Enabled = false;
-
-            }
-            else
-            {
-                this.buttonAggregateGo.Enabled = true;
-            }
+            this.buttonAggregateGo.Enabled = !string.IsNullOrWhiteSpace(this.textBoxAggregateSource.Text);
         }
 
         private void TextBoxAggregateTarget_TextChanged(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(this.textBoxAggregateTarget.Text))
+            this.buttonAggregateGo.Enabled = !string.IsNullOrWhiteSpace(this.textBoxAggregateTarget.Text);
+
+            if (!_AggregateTargetChangedByAutoSync)
             {
-               this.buttonAggregateGo.Enabled = false;
+                _SyncAggregateSourceWithTarget = false;
             }
         }
 
@@ -168,9 +159,11 @@ namespace File2
 
         private void SetDefaultAggregateTarget()
         {
-            if (!_AggregateTargetSetByUser)
+            if (_SyncAggregateSourceWithTarget)
             {
+                this._AggregateTargetChangedByAutoSync = true;
                 this.textBoxAggregateTarget.Text = this.textBoxAggregateSource.Text;
+                this._AggregateTargetChangedByAutoSync = false;
             }
         }
 
@@ -179,22 +172,38 @@ namespace File2
             int filesMoved = 0;
             int filesMoveFiled = 0;
             int filesSkipped = 0;
-            int maxFileNameLength = 30;
+            int maxFileNameLength = 28;
 
             var files = Directory.EnumerateFiles(sourceFolder, "*.*", SearchOption.AllDirectories).ToList();
             files.Sort();
 
             foreach (var file in files)
             {
+                System.Diagnostics.Debug.WriteLine("---> moving " + file);
                 var count = filesMoved + filesMoveFiled + filesSkipped;
                 var name = Path.GetFileName(file);
                 var nameInfo = name.Length > maxFileNameLength ? name.Substring(0, maxFileNameLength) : name;
-                progress($"moving {count + 1}/{files.Count} ({nameInfo})...");
+                progress($"moving {count + 1}/{files.Count} {(new FileInfo(file)).Length.ToFriendlyFileSize()} ({nameInfo})...");
+                //progress($"moving 999/999 {(new FileInfo(file)).Length.ToFriendlyFileSize()} ({nameInfo})...");
                 string targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
 
                 if (File.Exists(targetFile))
                 {
-                    filesSkipped++;
+                    if (file == targetFile)
+                    {
+                        filesSkipped++;
+                    }
+                    //override file if they have same name and size, otherwise skip
+                    else if ((new FileInfo(file)).Length == (new FileInfo(targetFile)).Length)
+                    {
+                        File.Delete(targetFile);
+                        File.Move(file, targetFile);
+                        filesMoved++;
+                    }
+                    else
+                    {
+                        filesSkipped++;
+                    }
                 }
                 else
                 {
@@ -208,6 +217,7 @@ namespace File2
                         filesMoveFiled++;
                     }
                 }
+                System.Diagnostics.Debug.WriteLine("---> done or skip " + file);
             }
 
             return $"Files moved: {filesMoved}{(filesMoveFiled > 0 ? ", failed: " + filesMoveFiled : "")}{(filesSkipped > 0 ? ", files skipped: " + filesSkipped : "")}";

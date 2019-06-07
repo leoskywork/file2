@@ -83,14 +83,14 @@
             this.groupBoxAggregate.TabStop = false;
             this.groupBoxAggregate.Text = "Aggregate";
             // 
-            // labelAggregateError
+            // labelAggregateMessage
             // 
             this.labelAggregateMessage.AutoSize = true;
-            this.labelAggregateMessage.Font = new System.Drawing.Font("SimSun", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelAggregateMessage.Font = new System.Drawing.Font("SimSun", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.labelAggregateMessage.ForeColor = System.Drawing.Color.Red;
             this.labelAggregateMessage.Location = new System.Drawing.Point(2, 102);
-            this.labelAggregateMessage.Name = "labelAggregateError";
-            this.labelAggregateMessage.Size = new System.Drawing.Size(163, 19);
+            this.labelAggregateMessage.Name = "labelAggregateMessage";
+            this.labelAggregateMessage.Size = new System.Drawing.Size(149, 19);
             this.labelAggregateMessage.TabIndex = 5;
             this.labelAggregateMessage.Text = "Invalid source";
             // 
@@ -154,7 +154,7 @@
             this.tabPageSetting.Location = new System.Drawing.Point(4, 25);
             this.tabPageSetting.Name = "tabPageSetting";
             this.tabPageSetting.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageSetting.Size = new System.Drawing.Size(614, 404);
+            this.tabPageSetting.Size = new System.Drawing.Size(774, 404);
             this.tabPageSetting.TabIndex = 1;
             this.tabPageSetting.Text = "Setting";
             this.tabPageSetting.UseVisualStyleBackColor = true;

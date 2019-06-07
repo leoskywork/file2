@@ -8,9 +8,11 @@ A tool to help to manipulate files
 
 ## todo
 
-* [ ] support multi-language
-  * [x] english
-  * [ ] chinese
 * [x] showing progress message
 * [ ] support cancellation for aggregating
-* [ ] what if user close program in the middle of moving file? redo moving next time?
+* [x] what if user close program in the middle of moving file? redo moving next time? - yes
+* [ ] minor issues
+  * [ ] aggregating progress msg too long when more than 1k files
+  * [ ] support multi-language
+    * [x] english
+    * [ ] chinese

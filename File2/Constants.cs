@@ -14,8 +14,6 @@
         string AggregateFileTarge { get; }
     }
 
-
-
     class LanguageEnglish : ILanguage
     {
         private readonly string _culture;
@@ -31,7 +29,4 @@
 
         public string AggregateFileTarge => "Target folder: ";
     }
-
-
-
 }
