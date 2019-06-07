@@ -23,6 +23,7 @@ namespace File2
             this.labelAggregateMessage.Text = null;
             this.folderBrowserDialogMain.ShowNewFolderButton = true;
             this.folderBrowserDialogMain.RootFolder = Environment.SpecialFolder.MyComputer;
+            this.buttonAggregateGo.Enabled = false;
         }
 
         private void ButtonAggregateSource_Click(object sender, EventArgs e)
@@ -141,14 +142,17 @@ namespace File2
 
         private void TextBoxAggregateSource_TextChanged(object sender, EventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(this.textBoxAggregateSource.Text))
+            this.labelAggregateMessage.Text = null;
+            this.SetDefaultAggregateTarget();
+
+            if (string.IsNullOrWhiteSpace(this.textBoxAggregateSource.Text))
             {
-                this.labelAggregateMessage.Text = null;
-                this.SetDefaultAggregateTarget();
+                this.buttonAggregateGo.Enabled = false;
+
             }
             else
             {
-                this.buttonAggregateGo.Enabled = false;
+                this.buttonAggregateGo.Enabled = true;
             }
         }
 
@@ -156,7 +160,7 @@ namespace File2
         {
             if (string.IsNullOrWhiteSpace(this.textBoxAggregateTarget.Text))
             {
-                this.buttonAggregateGo.Enabled = false;
+               this.buttonAggregateGo.Enabled = false;
             }
         }
 
