@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,7 +15,7 @@ namespace File2
         //todo: release task once complete
         private readonly ConcurrentDictionary<string, Tuple<Task<string>, CancellationTokenSource>> _taskDictionary = new ConcurrentDictionary<string, Tuple<Task<string>, CancellationTokenSource>>();
 
-        public static string AggregateFile(string sourceFolder, string targetFolder, Action<string> progress)
+        public static string AggregateFile(string sourceFolder, string targetFolder, Action<string> progress, CancellationToken? token = null)
         {
             int filesMoved = 0;
             int filesMoveFiled = 0;
@@ -29,10 +28,17 @@ namespace File2
             foreach (var file in files)
             {
                 System.Diagnostics.Debug.WriteLine("---> moving " + file);
+                if (token?.IsCancellationRequested == true)
+                {
+                    System.Diagnostics.Debug.WriteLine("---> task canceled");
+                    progress("task canceled");
+                    Thread.Sleep(1000);
+                    break;
+                }
                 var count = filesMoved + filesMoveFiled + filesSkipped;
                 var name = Path.GetFileName(file);
                 var nameInfo = name.Length > maxFileNameLength ? name.Substring(0, maxFileNameLength) : name;
-                progress($"moving {count + 1}/{files.Count} {(new FileInfo(file)).Length.ToFriendlyFileSize()} ({nameInfo})...");
+                progress($"moving {count + 1}/{files.Count} {nameInfo}({(new FileInfo(file)).Length.ToFriendlyFileSize()})...");
                 //progress($"moving 999/999 {(new FileInfo(file)).Length.ToFriendlyFileSize()} ({nameInfo})...");
                 string targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
 
@@ -75,16 +81,34 @@ namespace File2
         public KeyValuePair<string, Task<string>> AggregateFileAsync(string source, string target, Action<string> progress)
         {
             _aggregatingCount++;
-            var cancel = new CancellationTokenSource();
-            var task = new Task<string>(() => AggregateFile(source, target, progress));
+            var tokenSource = new CancellationTokenSource();
+            
+            var task = new Task<string>(() => AggregateFile(source, target, progress, tokenSource.Token), tokenSource.Token);
             var key = $"agt{_aggregatingCount}_{Guid.NewGuid()}";
-            _taskDictionary.TryAdd(key, Tuple.Create(task, cancel));
+            _taskDictionary.TryAdd(key, Tuple.Create(task, tokenSource));
+
+
+
+
             return new KeyValuePair<string, Task<string>>(key, task);
         }
 
         public void Cancel(string taskKey)
         {
-             
+            if (taskKey == null) return;
+
+            if (_taskDictionary.TryGetValue(taskKey, out Tuple<Task<string>, CancellationTokenSource> taskInfo))
+            {
+                taskInfo.Item2.Cancel();
+                this.Cleanup(taskKey);
+            }
+        }
+
+        public void Cleanup(string taskKey)
+        {
+            if (taskKey == null) return;
+
+            _taskDictionary.TryRemove(taskKey, out _);
         }
     }
 }

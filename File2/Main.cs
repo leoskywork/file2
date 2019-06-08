@@ -12,6 +12,7 @@ namespace File2
         private bool _syncAggregateSourceWithTarget = true;
         private bool _aggregateTargetChangedByAutoSync = false;
         private FileTool _fileTool = new FileTool();
+        private string _aggregateTaskKey;
 
         public Main()
         {
@@ -109,6 +110,7 @@ namespace File2
 
                 //var task = new Task<string>(() => _FileTool.AggregateFile(source, target, (message) => UpdateProgressMessage(message)));
                 var taskInfo = _fileTool.AggregateFileAsync(source, target, (message) => UpdateProgressMessage(message));
+                _aggregateTaskKey = taskInfo.Key;
 
                 taskInfo.Value.ContinueWith((_) =>
                 {
@@ -116,6 +118,7 @@ namespace File2
                     this.groupBoxAggregate.Enabled = true;
                     this.buttonAggregateGo.Enabled = true;
                     this.buttonAggregateCancel.Enabled = false;
+                    _fileTool.Cleanup(_aggregateTaskKey);
                 }, TaskScheduler.FromCurrentSynchronizationContext());
 
                 taskInfo.Value.Start();
@@ -174,7 +177,21 @@ namespace File2
 
         private void ButtonAggregateCancel_Click(object sender, EventArgs e)
         {
+            try
+            {
+                this.buttonAggregateCancel.Enabled = false;
+                if (_aggregateTaskKey != null)
+                {
+                    _fileTool.Cancel(_aggregateTaskKey);
+                    _aggregateTaskKey = null;
+                    this.labelAggregateMessage.Text = "Task will be canceled once current moving finished...";
+                }
 
+            }
+            catch (Exception ex)
+            {
+                this.labelAggregateMessage.Text = "Oops! Got an error when canceling: " + ex.Message;
+            }
         }
     }
 }

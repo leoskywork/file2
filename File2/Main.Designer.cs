@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageMain = new System.Windows.Forms.TabPage();
+            this.buttonAggregateCancel = new System.Windows.Forms.Button();
             this.groupBoxAggregate = new System.Windows.Forms.GroupBox();
             this.labelAggregateMessage = new System.Windows.Forms.Label();
             this.buttonAggregateGo = new System.Windows.Forms.Button();
@@ -40,7 +41,6 @@
             this.textBoxAggregateSource = new System.Windows.Forms.TextBox();
             this.tabPageSetting = new System.Windows.Forms.TabPage();
             this.folderBrowserDialogMain = new System.Windows.Forms.FolderBrowserDialog();
-            this.buttonAggregateCancel = new System.Windows.Forms.Button();
             this.tabControlMain.SuspendLayout();
             this.tabPageMain.SuspendLayout();
             this.groupBoxAggregate.SuspendLayout();
@@ -68,6 +68,18 @@
             this.tabPageMain.TabIndex = 0;
             this.tabPageMain.Text = "Home";
             this.tabPageMain.UseVisualStyleBackColor = true;
+            // 
+            // buttonAggregateCancel
+            // 
+            this.buttonAggregateCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonAggregateCancel.Enabled = false;
+            this.buttonAggregateCancel.Location = new System.Drawing.Point(660, 161);
+            this.buttonAggregateCancel.Name = "buttonAggregateCancel";
+            this.buttonAggregateCancel.Size = new System.Drawing.Size(105, 25);
+            this.buttonAggregateCancel.TabIndex = 5;
+            this.buttonAggregateCancel.Text = "Cancel";
+            this.buttonAggregateCancel.UseVisualStyleBackColor = true;
+            this.buttonAggregateCancel.Click += new System.EventHandler(this.ButtonAggregateCancel_Click);
             // 
             // groupBoxAggregate
             // 
@@ -160,18 +172,6 @@
             this.tabPageSetting.TabIndex = 1;
             this.tabPageSetting.Text = "Setting";
             this.tabPageSetting.UseVisualStyleBackColor = true;
-            // 
-            // buttonAggregateCancel
-            // 
-            this.buttonAggregateCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAggregateCancel.Enabled = false;
-            this.buttonAggregateCancel.Location = new System.Drawing.Point(335, 190);
-            this.buttonAggregateCancel.Name = "buttonAggregateCancel";
-            this.buttonAggregateCancel.Size = new System.Drawing.Size(105, 25);
-            this.buttonAggregateCancel.TabIndex = 5;
-            this.buttonAggregateCancel.Text = "Cancel";
-            this.buttonAggregateCancel.UseVisualStyleBackColor = true;
-            this.buttonAggregateCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
             // Main
             // 
