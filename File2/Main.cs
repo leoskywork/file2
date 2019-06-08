@@ -106,21 +106,21 @@ namespace File2
                 var source = this.textBoxAggregateSource.Text;
                 var target = this.textBoxAggregateTarget.Text;
 
-                var task = new Task<string>(() => _FileTool.AggregateFile(source, target, (message) => UpdateProgressMessage(message)));
+                //var task = new Task<string>(() => _FileTool.AggregateFile(source, target, (message) => UpdateProgressMessage(message)));
+                var taskInfo = _FileTool.AggregateFileAsync(source, target, (message) => UpdateProgressMessage(message));
 
-                task.ContinueWith((_) =>
+                taskInfo.Value.ContinueWith((_) =>
                 {
-                    this.labelAggregateMessage.Text = task.Result;
+                    this.labelAggregateMessage.Text = taskInfo.Value.Result;
                     this.groupBoxAggregate.Enabled = true;
                     this.buttonAggregateGo.Enabled = true;
                 }, TaskScheduler.FromCurrentSynchronizationContext());
 
-                task.Start();
-
+                taskInfo.Value.Start();
             }
             catch (Exception ex)
             {
-                this.labelAggregateMessage.Text = "Ooops! " + ex.Message;
+                this.labelAggregateMessage.Text = "Oops! " + ex.Message;
                 this.groupBoxAggregate.Enabled = true;
                 this.buttonAggregateGo.Enabled = true;
             }

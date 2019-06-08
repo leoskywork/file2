@@ -1,13 +1,20 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace File2
 {
     class FileTool
     {
+        //fixme: ensure multi-thread safe
+        private static int _AggregatingCount = 0;
+        private readonly ConcurrentDictionary<string, Tuple<Task<string>, CancellationTokenSource>> _TaskDictionary = new ConcurrentDictionary<string, Tuple<Task<string>, CancellationTokenSource>>();
+
         public string AggregateFile(string sourceFolder, string targetFolder, Action<string> progress)
         {
             int filesMoved = 0;
@@ -30,12 +37,12 @@ namespace File2
 
                 if (File.Exists(targetFile))
                 {
-                    if (file == targetFile)
+                    if (file == targetFile) //if same file
                     {
                         filesSkipped++;
                     }
                     //override file if they have same name and size, otherwise skip
-                    else if ((new FileInfo(file)).Length == (new FileInfo(targetFile)).Length)
+                    else if (file != targetFile && (new FileInfo(file)).Length == (new FileInfo(targetFile)).Length)
                     {
                         File.Delete(targetFile);
                         File.Move(file, targetFile);
@@ -62,6 +69,15 @@ namespace File2
             }
 
             return $"Files moved: {filesMoved}{(filesMoveFiled > 0 ? ", failed: " + filesMoveFiled : "")}{(filesSkipped > 0 ? ", files skipped: " + filesSkipped : "")}";
+        }
+
+        public KeyValuePair<string, Task<string>> AggregateFileAsync(string source, string target, Action<string> progress)
+        {
+            _AggregatingCount++;
+            var task = new Task<string>(() => AggregateFile(source, target, progress));
+            var key = $"agt{_AggregatingCount}_{Guid.NewGuid()}";
+            _TaskDictionary.TryAdd(key, Tuple.Create(task, new CancellationTokenSource()));
+            return new KeyValuePair<string, Task<string>>(key, task);
         }
     }
 }

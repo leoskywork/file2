@@ -14,5 +14,6 @@ A tool to help to manipulate files
 * [ ] minor issues
   * [ ] aggregating progress msg too long when more than 1k files
   * [ ] support multi-language
-    * [x] english
-    * [ ] chinese
+    * [x] English
+    * [ ] Chinese
+  * [ ] fix fixme
