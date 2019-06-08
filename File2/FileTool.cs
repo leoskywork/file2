@@ -12,10 +12,11 @@ namespace File2
     class FileTool
     {
         //fixme: ensure multi-thread safe
-        private static int _AggregatingCount = 0;
-        private readonly ConcurrentDictionary<string, Tuple<Task<string>, CancellationTokenSource>> _TaskDictionary = new ConcurrentDictionary<string, Tuple<Task<string>, CancellationTokenSource>>();
+        private static int _aggregatingCount = 0;
+        //todo: release task once complete
+        private readonly ConcurrentDictionary<string, Tuple<Task<string>, CancellationTokenSource>> _taskDictionary = new ConcurrentDictionary<string, Tuple<Task<string>, CancellationTokenSource>>();
 
-        public string AggregateFile(string sourceFolder, string targetFolder, Action<string> progress)
+        public static string AggregateFile(string sourceFolder, string targetFolder, Action<string> progress)
         {
             int filesMoved = 0;
             int filesMoveFiled = 0;
@@ -73,11 +74,17 @@ namespace File2
 
         public KeyValuePair<string, Task<string>> AggregateFileAsync(string source, string target, Action<string> progress)
         {
-            _AggregatingCount++;
+            _aggregatingCount++;
+            var cancel = new CancellationTokenSource();
             var task = new Task<string>(() => AggregateFile(source, target, progress));
-            var key = $"agt{_AggregatingCount}_{Guid.NewGuid()}";
-            _TaskDictionary.TryAdd(key, Tuple.Create(task, new CancellationTokenSource()));
+            var key = $"agt{_aggregatingCount}_{Guid.NewGuid()}";
+            _taskDictionary.TryAdd(key, Tuple.Create(task, cancel));
             return new KeyValuePair<string, Task<string>>(key, task);
+        }
+
+        public void Cancel(string taskKey)
+        {
+             
         }
     }
 }

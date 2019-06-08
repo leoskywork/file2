@@ -40,6 +40,7 @@
             this.textBoxAggregateSource = new System.Windows.Forms.TextBox();
             this.tabPageSetting = new System.Windows.Forms.TabPage();
             this.folderBrowserDialogMain = new System.Windows.Forms.FolderBrowserDialog();
+            this.buttonAggregateCancel = new System.Windows.Forms.Button();
             this.tabControlMain.SuspendLayout();
             this.tabPageMain.SuspendLayout();
             this.groupBoxAggregate.SuspendLayout();
@@ -58,6 +59,7 @@
             // 
             // tabPageMain
             // 
+            this.tabPageMain.Controls.Add(this.buttonAggregateCancel);
             this.tabPageMain.Controls.Add(this.groupBoxAggregate);
             this.tabPageMain.Location = new System.Drawing.Point(4, 25);
             this.tabPageMain.Name = "tabPageMain";
@@ -159,6 +161,18 @@
             this.tabPageSetting.Text = "Setting";
             this.tabPageSetting.UseVisualStyleBackColor = true;
             // 
+            // buttonAggregateCancel
+            // 
+            this.buttonAggregateCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonAggregateCancel.Enabled = false;
+            this.buttonAggregateCancel.Location = new System.Drawing.Point(335, 190);
+            this.buttonAggregateCancel.Name = "buttonAggregateCancel";
+            this.buttonAggregateCancel.Size = new System.Drawing.Size(105, 25);
+            this.buttonAggregateCancel.TabIndex = 5;
+            this.buttonAggregateCancel.Text = "Cancel";
+            this.buttonAggregateCancel.UseVisualStyleBackColor = true;
+            this.buttonAggregateCancel.Click += new System.EventHandler(this.buttonCancel_Click);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -191,6 +205,7 @@
         private System.Windows.Forms.TextBox textBoxAggregateSource;
         private System.Windows.Forms.Label labelAggregateMessage;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialogMain;
+        private System.Windows.Forms.Button buttonAggregateCancel;
     }
 }
 

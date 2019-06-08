@@ -9,9 +9,9 @@ namespace File2
     public partial class Main : Form
     {
         private ILanguage _language;
-        private bool _SyncAggregateSourceWithTarget = true;
-        private bool _AggregateTargetChangedByAutoSync = false;
-        private FileTool _FileTool = new FileTool();
+        private bool _syncAggregateSourceWithTarget = true;
+        private bool _aggregateTargetChangedByAutoSync = false;
+        private FileTool _fileTool = new FileTool();
 
         public Main()
         {
@@ -46,7 +46,7 @@ namespace File2
                 this.buttonAggregateGo.Enabled = true;
                 this.textBoxAggregateTarget.Text = this.folderBrowserDialogMain.SelectedPath;
                 this.labelAggregateMessage.Text = null;
-                _SyncAggregateSourceWithTarget = false;
+                _syncAggregateSourceWithTarget = false;
             }
         }
 
@@ -64,7 +64,7 @@ namespace File2
 
                 if (string.IsNullOrWhiteSpace(this.textBoxAggregateTarget.Text))
                 {
-                    this.labelAggregateMessage.Text = "Please select a targe folder";
+                    this.labelAggregateMessage.Text = "Please select a target folder";
                     return;
                 }
 
@@ -94,7 +94,7 @@ namespace File2
                 //warn if aggregate entire drive
                 if ((new DirectoryInfo(this.textBoxAggregateSource.Text)).Parent == null)
                 {
-                    if (MessageBox.Show($"Are you sure to aggregate the entire {this.textBoxAggregateSource.Text} dirve?",
+                    if (MessageBox.Show($"Are you sure to aggregate the entire {this.textBoxAggregateSource.Text} drive?",
                         this.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.OK)
                     {
                         this.buttonAggregateGo.Enabled = true;
@@ -103,17 +103,19 @@ namespace File2
                 }
 
                 this.groupBoxAggregate.Enabled = false;
+                this.buttonAggregateCancel.Enabled = true;
                 var source = this.textBoxAggregateSource.Text;
                 var target = this.textBoxAggregateTarget.Text;
 
                 //var task = new Task<string>(() => _FileTool.AggregateFile(source, target, (message) => UpdateProgressMessage(message)));
-                var taskInfo = _FileTool.AggregateFileAsync(source, target, (message) => UpdateProgressMessage(message));
+                var taskInfo = _fileTool.AggregateFileAsync(source, target, (message) => UpdateProgressMessage(message));
 
                 taskInfo.Value.ContinueWith((_) =>
                 {
                     this.labelAggregateMessage.Text = taskInfo.Value.Result;
                     this.groupBoxAggregate.Enabled = true;
                     this.buttonAggregateGo.Enabled = true;
+                    this.buttonAggregateCancel.Enabled = false;
                 }, TaskScheduler.FromCurrentSynchronizationContext());
 
                 taskInfo.Value.Start();
@@ -123,6 +125,7 @@ namespace File2
                 this.labelAggregateMessage.Text = "Oops! " + ex.Message;
                 this.groupBoxAggregate.Enabled = true;
                 this.buttonAggregateGo.Enabled = true;
+                this.buttonAggregateCancel.Enabled = false;
             }
         }
 
@@ -137,9 +140,9 @@ namespace File2
         {
             this.buttonAggregateGo.Enabled = !string.IsNullOrWhiteSpace(this.textBoxAggregateTarget.Text);
 
-            if (!_AggregateTargetChangedByAutoSync)
+            if (!_aggregateTargetChangedByAutoSync)
             {
-                _SyncAggregateSourceWithTarget = false;
+                _syncAggregateSourceWithTarget = false;
             }
         }
 
@@ -147,11 +150,11 @@ namespace File2
 
         private void SetDefaultAggregateTarget()
         {
-            if (_SyncAggregateSourceWithTarget)
+            if (_syncAggregateSourceWithTarget)
             {
-                this._AggregateTargetChangedByAutoSync = true;
+                this._aggregateTargetChangedByAutoSync = true;
                 this.textBoxAggregateTarget.Text = this.textBoxAggregateSource.Text;
-                this._AggregateTargetChangedByAutoSync = false;
+                this._aggregateTargetChangedByAutoSync = false;
             }
         }
 
@@ -167,5 +170,11 @@ namespace File2
             }
         }
 
+
+
+        private void ButtonAggregateCancel_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
