@@ -37,8 +37,8 @@ namespace File2
                 }
                 var count = filesMoved + filesMoveFiled + filesSkipped;
                 var name = Path.GetFileName(file);
-                var nameInfo = name.Length > maxFileNameLength ? name.Substring(0, maxFileNameLength) : name;
-                progress($"moving {count + 1}/{files.Count} {nameInfo}({(new FileInfo(file)).Length.ToFriendlyFileSize()})...");
+                var nameInfo = name.Length > maxFileNameLength ? name.Substring(0, maxFileNameLength) + "..." : name;
+                progress($"moving {count + 1}/{files.Count} {nameInfo}({(new FileInfo(file)).Length.ToFriendlyFileSize()})");
                 //progress($"moving 999/999 {(new FileInfo(file)).Length.ToFriendlyFileSize()} ({nameInfo})...");
                 string targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
 

@@ -5,6 +5,7 @@
         public static readonly string[] ImportantFolders = new string[] {"C:\\Program Files",
             "C:\\Program Files (x86)",
             "C:\\Windows" };
+        public static readonly string AppName = "File2";
     }
 
     interface ILanguage

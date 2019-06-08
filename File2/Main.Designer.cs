@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageMain = new System.Windows.Forms.TabPage();
@@ -41,6 +42,7 @@
             this.textBoxAggregateSource = new System.Windows.Forms.TextBox();
             this.tabPageSetting = new System.Windows.Forms.TabPage();
             this.folderBrowserDialogMain = new System.Windows.Forms.FolderBrowserDialog();
+            this.timerProgress = new System.Windows.Forms.Timer(this.components);
             this.tabControlMain.SuspendLayout();
             this.tabPageMain.SuspendLayout();
             this.groupBoxAggregate.SuspendLayout();
@@ -206,6 +208,7 @@
         private System.Windows.Forms.Label labelAggregateMessage;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialogMain;
         private System.Windows.Forms.Button buttonAggregateCancel;
+        private System.Windows.Forms.Timer timerProgress;
     }
 }
 

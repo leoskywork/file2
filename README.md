@@ -9,14 +9,14 @@ A tool to help to manipulate files
 ## todo
 
 * [x] showing progress message
-* [ ] support cancellation for aggregating
+* [x] support cancellation for aggregating
   * [x] graceful cancellation
   * [ ] immediate cancellation - kill the task and remove unfinished target file
 * [x] what if user close program in the middle of moving file? redo moving next time? - yes
-* [ ] stopwatch for tasks
-* [ ] minor issues
+* [x] stopwatch for aggregating task
+* [x] minor issues
   * [ ] aggregating progress msg too long when more than 1k files
-  * [ ] support multi-language
+  * [x] support multi-language
     * [x] English
     * [ ] Chinese
   * [ ] fix fixme, todo

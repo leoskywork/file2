@@ -12,7 +12,7 @@ namespace File2
             }
             else
             {
-                if(bytes == 0)
+                if (bytes == 0)
                 {
                     return "0 Byte";
                 }
@@ -42,6 +42,42 @@ namespace File2
         private static string FormatFileSize(long bytes, double powerBy1024, string format, string unit)
         {
             return (bytes * 1.0 / Math.Pow(1024.0, powerBy1024)).ToString(format) + unit;
+        }
+
+        public static string ToFriendlyString(this TimeSpan span)
+        {
+            if (span.TotalMilliseconds >= 0)
+            {
+                return ToFriendlyStringPositiveValue(span);
+            }
+            else
+            {
+                return ToFriendlyStringPositiveValue(TimeSpan.FromMilliseconds(span.TotalMilliseconds * -1));
+            }
+        }
+
+        private static string ToFriendlyStringPositiveValue(TimeSpan span)
+        {
+            if (span.TotalDays >= 1)
+            {
+                return $"{(int)span.TotalDays}d{(span.Hours > 0 ? " " + span.Hours + "h" : "")}";
+            }
+            else if (span.TotalHours >= 1)
+            {
+                return $"{(int)span.TotalHours}h{(span.Minutes > 0 ? " " + span.Minutes + "m" : "")}";
+            }
+            else if (span.TotalMinutes >= 1)
+            {
+                return $"{(int)span.TotalMinutes}m{(span.Seconds > 0 ? " " + span.Seconds + "s" : "")}";
+            }
+            else if (span.TotalSeconds >= 1)
+            {
+                return $"{(int)span.TotalSeconds}s";
+            }
+            else
+            {
+                return span.TotalSeconds == 0 ? "0s" : "1s";
+            }
         }
     }
 }

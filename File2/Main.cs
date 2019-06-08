@@ -13,6 +13,7 @@ namespace File2
         private bool _aggregateTargetChangedByAutoSync = false;
         private FileTool _fileTool = new FileTool();
         private string _aggregateTaskKey;
+        private TimeRange _aggregateTimes;
 
         public Main()
         {
@@ -27,6 +28,14 @@ namespace File2
             this.folderBrowserDialogMain.ShowNewFolderButton = true;
             this.folderBrowserDialogMain.RootFolder = Environment.SpecialFolder.MyComputer;
             this.buttonAggregateGo.Enabled = false;
+            this.timerProgress.Interval = 1000;
+            this.timerProgress.Tick += TimerProgress_Tick;
+            this.Text = Constants.AppName;
+        }
+
+        private void TimerProgress_Tick(object sender, EventArgs e)
+        {
+            UpdateUIStopwatch();
         }
 
         private void ButtonAggregateSource_Click(object sender, EventArgs e)
@@ -108,12 +117,12 @@ namespace File2
                 var source = this.textBoxAggregateSource.Text;
                 var target = this.textBoxAggregateTarget.Text;
 
-                //var task = new Task<string>(() => _FileTool.AggregateFile(source, target, (message) => UpdateProgressMessage(message)));
-                var taskInfo = _fileTool.AggregateFileAsync(source, target, (message) => UpdateProgressMessage(message));
+                var taskInfo = _fileTool.AggregateFileAsync(source, target, (message) => UpdateUIAggregateMessage(message));
                 _aggregateTaskKey = taskInfo.Key;
 
                 taskInfo.Value.ContinueWith((_) =>
                 {
+                    _aggregateTimes.End = DateTime.UtcNow;
                     this.labelAggregateMessage.Text = taskInfo.Value.Result;
                     this.groupBoxAggregate.Enabled = true;
                     this.buttonAggregateGo.Enabled = true;
@@ -122,9 +131,13 @@ namespace File2
                 }, TaskScheduler.FromCurrentSynchronizationContext());
 
                 taskInfo.Value.Start();
+                _aggregateTimes = new TimeRange();
+                this.timerProgress.Start();
+                UpdateUIStopwatch();
             }
             catch (Exception ex)
             {
+                _aggregateTimes.End = DateTime.UtcNow;
                 this.labelAggregateMessage.Text = "Oops! " + ex.Message;
                 this.groupBoxAggregate.Enabled = true;
                 this.buttonAggregateGo.Enabled = true;
@@ -137,6 +150,7 @@ namespace File2
             this.labelAggregateMessage.Text = null;
             this.SetDefaultAggregateTarget();
             this.buttonAggregateGo.Enabled = !string.IsNullOrWhiteSpace(this.textBoxAggregateSource.Text);
+            this._aggregateTimes = null;
         }
 
         private void TextBoxAggregateTarget_TextChanged(object sender, EventArgs e)
@@ -147,6 +161,8 @@ namespace File2
             {
                 _syncAggregateSourceWithTarget = false;
             }
+
+            this._aggregateTimes = null;
         }
 
 
@@ -161,19 +177,28 @@ namespace File2
             }
         }
 
-        private void UpdateProgressMessage(string progressInfo)
+        private void UpdateUIAggregateMessage(string message)
         {
             if (this.InvokeRequired)
             {
-                this.BeginInvoke(new Action<string>(UpdateProgressMessage), progressInfo);
+                this.BeginInvoke(new Action<string>(UpdateUIAggregateMessage), message);
             }
             else
             {
-                this.labelAggregateMessage.Text = progressInfo;
+                this.labelAggregateMessage.Text = message;
             }
         }
 
+        private void UpdateUIStopwatch()
+        {
+            string aggregatingSpent = null;
+            if (_aggregateTimes != null)
+            {
+                aggregatingSpent = (_aggregateTimes.GetCancellationPeriod() ?? _aggregateTimes.GetPeriod()).ToFriendlyString();
+            }
 
+            this.Text = Constants.AppName + (aggregatingSpent != null ? (_aggregateTimes.Canceled ? " - aggr cxl " : " - aggregating ") + aggregatingSpent : "");
+        }
 
         private void ButtonAggregateCancel_Click(object sender, EventArgs e)
         {
@@ -182,11 +207,11 @@ namespace File2
                 this.buttonAggregateCancel.Enabled = false;
                 if (_aggregateTaskKey != null)
                 {
+                    _aggregateTimes.CancellationTime = DateTime.UtcNow;
                     _fileTool.Cancel(_aggregateTaskKey);
                     _aggregateTaskKey = null;
                     this.labelAggregateMessage.Text = "Task will be canceled once current moving finished...";
                 }
-
             }
             catch (Exception ex)
             {
