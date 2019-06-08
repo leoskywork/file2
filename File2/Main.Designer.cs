@@ -56,7 +56,7 @@
             this.tabControlMain.Location = new System.Drawing.Point(0, 0);
             this.tabControlMain.Name = "tabControlMain";
             this.tabControlMain.SelectedIndex = 0;
-            this.tabControlMain.Size = new System.Drawing.Size(782, 433);
+            this.tabControlMain.Size = new System.Drawing.Size(882, 453);
             this.tabControlMain.TabIndex = 0;
             // 
             // tabPageMain
@@ -66,7 +66,7 @@
             this.tabPageMain.Location = new System.Drawing.Point(4, 25);
             this.tabPageMain.Name = "tabPageMain";
             this.tabPageMain.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageMain.Size = new System.Drawing.Size(774, 404);
+            this.tabPageMain.Size = new System.Drawing.Size(874, 424);
             this.tabPageMain.TabIndex = 0;
             this.tabPageMain.Text = "Home";
             this.tabPageMain.UseVisualStyleBackColor = true;
@@ -75,7 +75,7 @@
             // 
             this.buttonAggregateCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonAggregateCancel.Enabled = false;
-            this.buttonAggregateCancel.Location = new System.Drawing.Point(660, 161);
+            this.buttonAggregateCancel.Location = new System.Drawing.Point(760, 161);
             this.buttonAggregateCancel.Name = "buttonAggregateCancel";
             this.buttonAggregateCancel.Size = new System.Drawing.Size(105, 25);
             this.buttonAggregateCancel.TabIndex = 5;
@@ -94,13 +94,16 @@
             this.groupBoxAggregate.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBoxAggregate.Location = new System.Drawing.Point(3, 3);
             this.groupBoxAggregate.Name = "groupBoxAggregate";
-            this.groupBoxAggregate.Size = new System.Drawing.Size(768, 141);
+            this.groupBoxAggregate.Size = new System.Drawing.Size(868, 141);
             this.groupBoxAggregate.TabIndex = 0;
             this.groupBoxAggregate.TabStop = false;
             this.groupBoxAggregate.Text = "Aggregate";
             // 
             // labelAggregateMessage
             // 
+            this.labelAggregateMessage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelAggregateMessage.AutoEllipsis = true;
             this.labelAggregateMessage.AutoSize = true;
             this.labelAggregateMessage.Font = new System.Drawing.Font("SimSun", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.labelAggregateMessage.ForeColor = System.Drawing.Color.Red;
@@ -113,7 +116,7 @@
             // buttonAggregateGo
             // 
             this.buttonAggregateGo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAggregateGo.Location = new System.Drawing.Point(657, 105);
+            this.buttonAggregateGo.Location = new System.Drawing.Point(757, 105);
             this.buttonAggregateGo.Name = "buttonAggregateGo";
             this.buttonAggregateGo.Size = new System.Drawing.Size(105, 25);
             this.buttonAggregateGo.TabIndex = 4;
@@ -124,7 +127,7 @@
             // buttonAggregateTarget
             // 
             this.buttonAggregateTarget.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAggregateTarget.Location = new System.Drawing.Point(657, 65);
+            this.buttonAggregateTarget.Location = new System.Drawing.Point(757, 65);
             this.buttonAggregateTarget.Name = "buttonAggregateTarget";
             this.buttonAggregateTarget.Size = new System.Drawing.Size(105, 25);
             this.buttonAggregateTarget.TabIndex = 3;
@@ -136,7 +139,7 @@
             // buttonAggregateSource
             // 
             this.buttonAggregateSource.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAggregateSource.Location = new System.Drawing.Point(657, 24);
+            this.buttonAggregateSource.Location = new System.Drawing.Point(757, 24);
             this.buttonAggregateSource.Name = "buttonAggregateSource";
             this.buttonAggregateSource.Size = new System.Drawing.Size(105, 25);
             this.buttonAggregateSource.TabIndex = 2;
@@ -151,7 +154,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxAggregateTarget.Location = new System.Drawing.Point(6, 65);
             this.textBoxAggregateTarget.Name = "textBoxAggregateTarget";
-            this.textBoxAggregateTarget.Size = new System.Drawing.Size(645, 25);
+            this.textBoxAggregateTarget.Size = new System.Drawing.Size(745, 25);
             this.textBoxAggregateTarget.TabIndex = 1;
             this.textBoxAggregateTarget.TextChanged += new System.EventHandler(this.TextBoxAggregateTarget_TextChanged);
             // 
@@ -161,7 +164,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxAggregateSource.Location = new System.Drawing.Point(6, 24);
             this.textBoxAggregateSource.Name = "textBoxAggregateSource";
-            this.textBoxAggregateSource.Size = new System.Drawing.Size(645, 25);
+            this.textBoxAggregateSource.Size = new System.Drawing.Size(745, 25);
             this.textBoxAggregateSource.TabIndex = 0;
             this.textBoxAggregateSource.TextChanged += new System.EventHandler(this.TextBoxAggregateSource_TextChanged);
             // 
@@ -170,7 +173,7 @@
             this.tabPageSetting.Location = new System.Drawing.Point(4, 25);
             this.tabPageSetting.Name = "tabPageSetting";
             this.tabPageSetting.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageSetting.Size = new System.Drawing.Size(774, 404);
+            this.tabPageSetting.Size = new System.Drawing.Size(874, 404);
             this.tabPageSetting.TabIndex = 1;
             this.tabPageSetting.Text = "Setting";
             this.tabPageSetting.UseVisualStyleBackColor = true;
@@ -179,9 +182,11 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(782, 433);
+            this.AutoScroll = true;
+            this.ClientSize = new System.Drawing.Size(882, 453);
             this.Controls.Add(this.tabControlMain);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(500, 400);
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "File2";

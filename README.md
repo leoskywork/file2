@@ -20,3 +20,5 @@ A tool to help to manipulate files
     * [x] English
     * [ ] Chinese
   * [ ] fix fixme, todo
+  * [ ] message label overlap with button when main form shrink
+    * [ ] use textbox(readonly mode) to replace label?

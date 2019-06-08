@@ -31,6 +31,7 @@ namespace File2
             this.timerProgress.Interval = 1000;
             this.timerProgress.Tick += TimerProgress_Tick;
             this.Text = Constants.AppName;
+            //this.labelAggregateMessage.Text = "xxxxx xxx1xxxxxxxxxx2xxxxxxx3xxxxx34xxxxx5xxx6xxxx7xx9";
         }
 
         private void TimerProgress_Tick(object sender, EventArgs e)
