@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace File2
+namespace File2.Common
 {
     static class Utility
     {
@@ -8,7 +8,7 @@ namespace File2
         {
             if (alwaysInMB)
             {
-                return $"{bytes * 1.0 / 1024.0 / 1024.0} MB";
+                return bytes == 0 ? "0 MB" : FormatFileSize(bytes, 2.0, format, "MB");
             }
             else
             {

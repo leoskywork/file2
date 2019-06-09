@@ -31,11 +31,6 @@ namespace File2
             }, source.Token);
         }
 
-        //public void Start()
-        //{
-        //    this.Task?.Start();
-        //}
-
 
         public void Dispose()
         {

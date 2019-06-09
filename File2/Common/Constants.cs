@@ -1,4 +1,4 @@
-﻿namespace File2
+﻿namespace File2.Common
 {
     class Constants
     {
