@@ -10,13 +10,14 @@ namespace File2
 {
     class FileTool
     {
-        //fixme: ensure multi-thread safe
-        private static int _aggregatingCount = 0;
         //todo: release task once complete
-        private readonly ConcurrentDictionary<string, Tuple<Task<string>, CancellationTokenSource>> _taskDictionary = new ConcurrentDictionary<string, Tuple<Task<string>, CancellationTokenSource>>();
+        private readonly ConcurrentDictionary<string, FileTask<string>> _taskDictionary = new ConcurrentDictionary<string, FileTask<string>>();
 
         public static string AggregateFile(string sourceFolder, string targetFolder, Action<string> progress, CancellationToken? token = null)
         {
+            //todo: doesn't call File.Move(..) if source and target have different drive volumes
+            //ref: https://stackoverflow.com/questions/187768/can-i-show-file-copy-progress-using-fileinfo-copyto-in-net
+            //https://stackoverflow.com/questions/882686/asynchronous-file-copy-move-in-c-sharp
             int filesMoved = 0;
             int filesMoveFiled = 0;
             int filesSkipped = 0;
@@ -32,7 +33,7 @@ namespace File2
                 {
                     System.Diagnostics.Debug.WriteLine("---> task canceled");
                     progress("task canceled");
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                     break;
                 }
                 var count = filesMoved + filesMoveFiled + filesSkipped;
@@ -78,28 +79,49 @@ namespace File2
             return $"Files moved: {filesMoved}{(filesMoveFiled > 0 ? ", failed: " + filesMoveFiled : "")}{(filesSkipped > 0 ? ", files skipped: " + filesSkipped : "")}";
         }
 
-        public KeyValuePair<string, Task<string>> AggregateFileAsync(string source, string target, Action<string> progress)
+        public FileTask<string> AggregateFileAsync(string source, string target, Action<string> progress)
         {
-            _aggregatingCount++;
+           
             var tokenSource = new CancellationTokenSource();
-            
-            var task = new Task<string>(() => AggregateFile(source, target, progress, tokenSource.Token), tokenSource.Token);
-            var key = $"agt{_aggregatingCount}_{Guid.NewGuid()}";
-            _taskDictionary.TryAdd(key, Tuple.Create(task, tokenSource));
+            var fileTask = new FileTask<string>(() => AggregateFile(source, target, progress, tokenSource.Token), tokenSource, "agt");
+            _taskDictionary.TryAdd(fileTask.Key, fileTask);
 
 
-
-
-            return new KeyValuePair<string, Task<string>>(key, task);
+            return fileTask;
         }
 
         public void Cancel(string taskKey)
         {
             if (taskKey == null) return;
 
-            if (_taskDictionary.TryGetValue(taskKey, out Tuple<Task<string>, CancellationTokenSource> taskInfo))
+            if (_taskDictionary.TryGetValue(taskKey, out FileTask<string> fileTask))
             {
-                taskInfo.Item2.Cancel();
+                fileTask.TokenSource.Cancel();
+                this.Cleanup(taskKey);
+            }
+        }
+
+        public void Abort(string taskKey)
+        {
+            if (taskKey == null) return;
+
+            if (Environment.MachineName == "LEO-ASUS") return;
+
+            if (_taskDictionary.TryGetValue(taskKey, out FileTask<string> fileTask))
+            {
+                fileTask.TokenSource.Token.Register(() => { System.Diagnostics.Debug.WriteLine("abort cxl token callback"); });
+                fileTask.TokenSource.Cancel();
+
+                if (fileTask.Task.Status == TaskStatus.Running)
+                {
+                    //kill the task or return the task result right now
+                    //https://stackoverflow.com/questions/4359910/is-it-possible-to-abort-a-task-like-aborting-a-thread-thread-abort-method
+                    //https://stackoverflow.com/questions/4783865/how-do-i-abort-cancel-tpl-tasks
+
+                    //Should not call Thread.Abort(), but do it for now
+
+                }
+
                 this.Cleanup(taskKey);
             }
         }
@@ -110,5 +132,7 @@ namespace File2
 
             _taskDictionary.TryRemove(taskKey, out _);
         }
+
+
     }
 }

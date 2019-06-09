@@ -11,9 +11,10 @@ A tool to help to manipulate files
 * [x] showing progress message
 * [x] support cancellation for aggregating
   * [x] graceful cancellation
-  * [ ] immediate cancellation - kill the task and remove unfinished target file
+  * [ ] immediate cancellation/abort current moving - kill the task and remove unfinished target file
 * [x] what if user close program in the middle of moving file? redo moving next time? - yes
 * [x] stopwatch for aggregating task
+* [ ] hide cancel buttons by default
 * [x] minor issues
   * [ ] aggregating progress msg too long when more than 1k files
   * [x] support multi-language

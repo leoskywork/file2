@@ -115,23 +115,25 @@ namespace File2
 
                 this.groupBoxAggregate.Enabled = false;
                 this.buttonAggregateCancel.Enabled = true;
+                this.buttonAggregateAbort.Enabled = true;
                 var source = this.textBoxAggregateSource.Text;
                 var target = this.textBoxAggregateTarget.Text;
 
-                var taskInfo = _fileTool.AggregateFileAsync(source, target, (message) => UpdateUIAggregateMessage(message));
-                _aggregateTaskKey = taskInfo.Key;
+                var fileTask = _fileTool.AggregateFileAsync(source, target, (message) => UpdateUIAggregateMessage(message));
+                _aggregateTaskKey = fileTask.Key;
 
-                taskInfo.Value.ContinueWith((_) =>
+                fileTask.Task.ContinueWith((_) =>
                 {
                     _aggregateTimes.End = DateTime.UtcNow;
-                    this.labelAggregateMessage.Text = taskInfo.Value.Result;
+                    this.labelAggregateMessage.Text = fileTask.Task.Result;
                     this.groupBoxAggregate.Enabled = true;
                     this.buttonAggregateGo.Enabled = true;
                     this.buttonAggregateCancel.Enabled = false;
+                    this.buttonAggregateAbort.Enabled = false;
                     _fileTool.Cleanup(_aggregateTaskKey);
                 }, TaskScheduler.FromCurrentSynchronizationContext());
 
-                taskInfo.Value.Start();
+                fileTask.Task.Start();
                 _aggregateTimes = new TimeRange();
                 this.timerProgress.Start();
                 UpdateUIStopwatch();
@@ -143,6 +145,7 @@ namespace File2
                 this.groupBoxAggregate.Enabled = true;
                 this.buttonAggregateGo.Enabled = true;
                 this.buttonAggregateCancel.Enabled = false;
+                this.buttonAggregateAbort.Enabled = false;
             }
         }
 
@@ -206,12 +209,33 @@ namespace File2
             try
             {
                 this.buttonAggregateCancel.Enabled = false;
+                this.buttonAggregateAbort.Enabled = false;
                 if (_aggregateTaskKey != null)
                 {
                     _aggregateTimes.CancellationTime = DateTime.UtcNow;
                     _fileTool.Cancel(_aggregateTaskKey);
                     _aggregateTaskKey = null;
                     this.labelAggregateMessage.Text = "Task will be canceled once current moving finished...";
+                }
+            }
+            catch (Exception ex)
+            {
+                this.labelAggregateMessage.Text = "Oops! Got an error when canceling: " + ex.Message;
+            }
+        }
+
+        private void ButtonAggregateAbort_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                this.buttonAggregateAbort.Enabled = false;
+                this.buttonAggregateCancel.Enabled = false;
+                if (_aggregateTaskKey != null)
+                {
+                    _aggregateTimes.End = DateTime.UtcNow;
+                    _fileTool.Abort(_aggregateTaskKey);
+                    _aggregateTaskKey = null;
+                    this.labelAggregateMessage.Text = "Aborting current moving...";
                 }
             }
             catch (Exception ex)
