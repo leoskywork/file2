@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageMain = new System.Windows.Forms.TabPage();
+            this.buttonAggregateAbort = new System.Windows.Forms.Button();
             this.buttonAggregateCancel = new System.Windows.Forms.Button();
             this.groupBoxAggregate = new System.Windows.Forms.GroupBox();
             this.labelAggregateMessage = new System.Windows.Forms.Label();
@@ -43,7 +44,7 @@
             this.tabPageSetting = new System.Windows.Forms.TabPage();
             this.folderBrowserDialogMain = new System.Windows.Forms.FolderBrowserDialog();
             this.timerProgress = new System.Windows.Forms.Timer(this.components);
-            this.buttonAggregateAbort = new System.Windows.Forms.Button();
+            this.buttonFolderInfo = new System.Windows.Forms.Button();
             this.tabControlMain.SuspendLayout();
             this.tabPageMain.SuspendLayout();
             this.groupBoxAggregate.SuspendLayout();
@@ -62,6 +63,7 @@
             // 
             // tabPageMain
             // 
+            this.tabPageMain.Controls.Add(this.buttonFolderInfo);
             this.tabPageMain.Controls.Add(this.buttonAggregateAbort);
             this.tabPageMain.Controls.Add(this.buttonAggregateCancel);
             this.tabPageMain.Controls.Add(this.groupBoxAggregate);
@@ -72,6 +74,18 @@
             this.tabPageMain.TabIndex = 0;
             this.tabPageMain.Text = "Home";
             this.tabPageMain.UseVisualStyleBackColor = true;
+            // 
+            // buttonAggregateAbort
+            // 
+            this.buttonAggregateAbort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonAggregateAbort.Enabled = false;
+            this.buttonAggregateAbort.Location = new System.Drawing.Point(549, 161);
+            this.buttonAggregateAbort.Name = "buttonAggregateAbort";
+            this.buttonAggregateAbort.Size = new System.Drawing.Size(105, 25);
+            this.buttonAggregateAbort.TabIndex = 6;
+            this.buttonAggregateAbort.Text = "Abort";
+            this.buttonAggregateAbort.UseVisualStyleBackColor = true;
+            this.buttonAggregateAbort.Click += new System.EventHandler(this.ButtonAggregateAbort_Click);
             // 
             // buttonAggregateCancel
             // 
@@ -133,7 +147,7 @@
             this.buttonAggregateTarget.Name = "buttonAggregateTarget";
             this.buttonAggregateTarget.Size = new System.Drawing.Size(105, 25);
             this.buttonAggregateTarget.TabIndex = 3;
-            this.buttonAggregateTarget.Text = "target...";
+            this.buttonAggregateTarget.Text = "Target...";
             this.buttonAggregateTarget.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.buttonAggregateTarget.UseVisualStyleBackColor = true;
             this.buttonAggregateTarget.Click += new System.EventHandler(this.ButtonAggregateTarget_Click);
@@ -145,7 +159,7 @@
             this.buttonAggregateSource.Name = "buttonAggregateSource";
             this.buttonAggregateSource.Size = new System.Drawing.Size(105, 25);
             this.buttonAggregateSource.TabIndex = 2;
-            this.buttonAggregateSource.Text = "source...";
+            this.buttonAggregateSource.Text = "Source...";
             this.buttonAggregateSource.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.buttonAggregateSource.UseVisualStyleBackColor = true;
             this.buttonAggregateSource.Click += new System.EventHandler(this.ButtonAggregateSource_Click);
@@ -175,22 +189,20 @@
             this.tabPageSetting.Location = new System.Drawing.Point(4, 25);
             this.tabPageSetting.Name = "tabPageSetting";
             this.tabPageSetting.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageSetting.Size = new System.Drawing.Size(874, 404);
+            this.tabPageSetting.Size = new System.Drawing.Size(774, 424);
             this.tabPageSetting.TabIndex = 1;
             this.tabPageSetting.Text = "Setting";
             this.tabPageSetting.UseVisualStyleBackColor = true;
             // 
-            // buttonAggregateAbort
+            // buttonFolderInfo
             // 
-            this.buttonAggregateAbort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAggregateAbort.Enabled = false;
-            this.buttonAggregateAbort.Location = new System.Drawing.Point(549, 161);
-            this.buttonAggregateAbort.Name = "buttonAggregateAbort";
-            this.buttonAggregateAbort.Size = new System.Drawing.Size(105, 25);
-            this.buttonAggregateAbort.TabIndex = 6;
-            this.buttonAggregateAbort.Text = "Abort";
-            this.buttonAggregateAbort.UseVisualStyleBackColor = true;
-            this.buttonAggregateAbort.Click += new System.EventHandler(this.ButtonAggregateAbort_Click);
+            this.buttonFolderInfo.Location = new System.Drawing.Point(660, 246);
+            this.buttonFolderInfo.Name = "buttonFolderInfo";
+            this.buttonFolderInfo.Size = new System.Drawing.Size(105, 25);
+            this.buttonFolderInfo.TabIndex = 7;
+            this.buttonFolderInfo.Text = "Get size";
+            this.buttonFolderInfo.UseVisualStyleBackColor = true;
+            this.buttonFolderInfo.Click += new System.EventHandler(this.buttonFolderInfo_Click);
             // 
             // Main
             // 
@@ -229,6 +241,7 @@
         private System.Windows.Forms.Button buttonAggregateCancel;
         private System.Windows.Forms.Timer timerProgress;
         private System.Windows.Forms.Button buttonAggregateAbort;
+        private System.Windows.Forms.Button buttonFolderInfo;
     }
 }
 

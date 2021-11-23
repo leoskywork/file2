@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,12 +10,17 @@ namespace File2
 {
     public partial class Main : Form
     {
+        private const int _UITimeInterval = 1000;
+        private const int _UIMessageOffset = _UITimeInterval + 100;
+
         private ILanguage _language;
         private bool _syncAggregateSourceWithTarget = true;
         private bool _aggregateTargetChangedByAutoSync = false;
         private FileTool _fileTool = new FileTool();
         private string _aggregateTaskKey;
         private TimeRange _aggregateTimes;
+        private System.Collections.Concurrent.ConcurrentQueue<Tuple<string, DateTime>> _sizingMessages = new System.Collections.Concurrent.ConcurrentQueue<Tuple<string, DateTime>>();
+
 
         public Main()
         {
@@ -31,6 +37,7 @@ namespace File2
             this.buttonAggregateGo.Enabled = false;
             this.timerProgress.Interval = 1000;
             this.timerProgress.Tick += TimerProgress_Tick;
+            this.timerProgress.Start();
             this.Text = Constants.AppName;
             //this.labelAggregateMessage.Text = "xxxxx xxx1xxxxxxxxxx2xxxxxxx3xxxxx34xxxxx5xxx6xxxx7xx9";
         }
@@ -38,6 +45,33 @@ namespace File2
         private void TimerProgress_Tick(object sender, EventArgs e)
         {
             UpdateUIStopwatch();
+
+            if (!_sizingMessages.IsEmpty)
+            {
+                Tuple<string, DateTime> first;
+                if (_sizingMessages.TryDequeue(out first))
+                {
+                    UpdateUIWarningMessage(first.Item1);
+                }
+
+                var utcWithOffset = DateTime.UtcNow.AddMilliseconds(-_UIMessageOffset); //only show most recent messages
+
+                while (!_sizingMessages.IsEmpty)
+                {
+                    Tuple<string, DateTime> head;
+                    if (_sizingMessages.TryPeek(out head))
+                    {
+                        if (head.Item2 < utcWithOffset)
+                        {
+                            _sizingMessages.TryDequeue(out _);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         private void ButtonAggregateSource_Click(object sender, EventArgs e)
@@ -92,6 +126,12 @@ namespace File2
                     return;
                 }
 
+                if(this.textBoxAggregateSource.Text == this.textBoxAggregateTarget.Text)
+                {
+                    this.labelAggregateMessage.Text = "Target folder is the same as source";
+                    return;
+                }
+
                 //warn if access system folders
                 if (Constants.ImportantFolders.Any(f => this.textBoxAggregateSource.Text.StartsWith(f)))
                 {
@@ -120,7 +160,7 @@ namespace File2
                 var source = this.textBoxAggregateSource.Text;
                 var target = this.textBoxAggregateTarget.Text;
 
-                var fileTask = _fileTool.AggregateFileAsync(source, target, (message) => UpdateUIAggregateMessage(message));
+                var fileTask = _fileTool.AggregateFileAsync(source, target, (message) => UpdateUIWarningMessage(message));
                 _aggregateTaskKey = fileTask.Key;
 
                 fileTask.Task.ContinueWith((_) =>
@@ -182,11 +222,11 @@ namespace File2
             }
         }
 
-        private void UpdateUIAggregateMessage(string message)
+        private void UpdateUIWarningMessage(string message)
         {
             if (this.InvokeRequired)
             {
-                this.BeginInvoke(new Action<string>(UpdateUIAggregateMessage), message);
+                this.BeginInvoke(new Action<string>(UpdateUIWarningMessage), message);
             }
             else
             {
@@ -244,5 +284,75 @@ namespace File2
                 this.labelAggregateMessage.Text = "Oops! Got an error when canceling: " + ex.Message;
             }
         }
+
+        private void buttonFolderInfo_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                while(!_sizingMessages.IsEmpty)
+                {
+                    this._sizingMessages.TryDequeue(out _);
+                }
+
+                this.buttonFolderInfo.Enabled = false;
+                // UpdateUIWarningMessage("Please run with admin permission accordingly.");
+
+                if (string.IsNullOrWhiteSpace(this.textBoxAggregateSource.Text))
+                {
+                    this.labelAggregateMessage.Text = "Please select a source folder";
+                    this.buttonFolderInfo.Enabled = true;
+                    return;
+                }
+
+                if (!Directory.Exists(this.textBoxAggregateSource.Text))
+                {
+                    this.labelAggregateMessage.Text = "Source folder not exist";
+                    this.buttonFolderInfo.Enabled = true;
+                    return;
+                }
+
+                var folder = this.textBoxAggregateSource.Text;
+                var fileTask = new FileTool().GetSubFolderInfoAsync(folder, 0 * 1024 * 1024 , SizingProgress);
+
+                fileTask.Task.ContinueWith(_ =>
+                {
+                    if (fileTask.Task.Exception != null)
+                    {
+                        //fixme: seems can not be catch by outside
+                        //throw fileTask.Task.Exception;
+                        MessageBox.Show("Error while sizing folder：" + string.Join(",", fileTask.Task.Exception.InnerExceptions.Select(ex => ex.Message)));
+                    }
+                    else
+                    {
+                        var timestamp = DateTime.Now.ToString("yyMMdd-HHmmss");
+                        var lines = fileTask.Task.Result.FilesAndSizes.Select(r => r.Item1 + ", " + r.Item2.ToFriendlyFileSize()).ToArray();
+                        File.WriteAllLines($"{Environment.CurrentDirectory}/sizing-{timestamp}.txt", lines);
+
+                        if (fileTask.Task.Result.Errors.Count > 0)
+                        {
+                            var errors = fileTask.Task.Result.Errors.Select(ex => ex.Message);
+                            File.WriteAllLines($"{Environment.CurrentDirectory}/sizing-{timestamp}-error.txt", errors);
+                        }
+                    }
+
+                    this.buttonFolderInfo.Enabled = true;
+                }, TaskScheduler.FromCurrentSynchronizationContext());
+
+                fileTask.Task.Start();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to get folder info due to：" + ex.ToString());
+                this.buttonFolderInfo.Enabled = true;
+            }
+        }
+
+        private void SizingProgress(string message)
+        {
+            //  UpdateUIWarningMessage(message)
+            _sizingMessages.Enqueue(Tuple.Create(message, DateTime.UtcNow));
+
+        }
+
     }
 }

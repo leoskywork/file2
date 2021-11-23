@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +13,6 @@ namespace File2
 
         public Task<T> Task { get; }
         public CancellationTokenSource TokenSource { get; }
-        public string CurrentFile { get; set; }
         public string Key { get; }
 
        
@@ -38,5 +38,12 @@ namespace File2
             this.TokenSource.Dispose();
             _thread = null;
         }
+    }
+
+    class SubFolderResult
+    {
+        public List<Tuple<string, long, int>> FilesAndSizes { get; } = new List<Tuple<string, long, int>>();
+        public List<Exception> Errors { get; } = new List<Exception>();
+        public int Count { get; set; }
     }
 }
