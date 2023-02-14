@@ -140,6 +140,7 @@ namespace File2
             _taskDictionary.TryRemove(taskKey, out _);
         }
 
+        //fixme: why not use multi threading then wait all ？
         public FileTask<SubFolderResult> GetSubFolderInfoAsync(string path, long minSizeByte, Action<string> progress)
         {
             var tokenSource = new CancellationTokenSource();
@@ -165,8 +166,8 @@ namespace File2
                 //result.FilesAndSizes.Sort((a, b) => b.Item2 - a.Item2 > 0 ? 1 : -1); //fixme, null reference exception?? (when sizing c/user/leo)
                 result.FilesAndSizes.Sort((a, b) => (b?.Item2 ?? 0) - (a?.Item2 ?? 0) > 0 ? 1 : -1);
 
-                var size = result.FilesAndSizes.Select(f => f.Item2).Sum().ToFriendlyFileSize();
-                progress($"file count: {result.Count.ToString("#,###")} total size: {size} (size > {minSizeByte.ToFriendlyFileSize()})");
+                var size = result.FilesAndSizes.Sum(f => f.Item2).ToFriendlyFileSize();
+                progress($"file count: {result.Count:#,###} total size: {size} (size > {minSizeByte.ToFriendlyFileSize()})");
 
                 return result;
             }, tokenSource, "get-size");
@@ -213,7 +214,7 @@ namespace File2
 
                 var fileInfo = new FileInfo(file);
                 var fileSize = fileInfo.Length;
-                progress($"sizing {result.Count.ToString("#,###")} {GetDisplayFileName(fileInfo.Name)}({ fileSize.ToFriendlyFileSize()})");
+                progress($"#{result.Count:#,###} {GetDisplayFileName(fileInfo.Name)}({ fileSize.ToFriendlyFileSize()})");
 
                 if (fileSize > minSizeByte)
                 {

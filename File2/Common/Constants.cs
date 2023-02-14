@@ -2,10 +2,20 @@
 {
     class Constants
     {
-        public static readonly string[] ImportantFolders = new string[] {"C:\\Program Files",
+        public static readonly string[] ImportantFolders = new string[] {
+            "C:\\",
+            "C:\\$WinREAgent",
+            "C:\\inetpub",
+            "C:\\Program Files",
             "C:\\Program Files (x86)",
-            "C:\\Windows" };
+            "C:\\ProgramData",
+            "C:\\Recovery",
+            "C:\\Windows",
+            "C:\\Users"
+        };
         public static readonly string AppName = "File2";
+        public static readonly int ProgressUpdateRateInMS = 200;// 10;//100;//1000;
+        public static readonly int UIMessageOffsetInMS = ProgressUpdateRateInMS + 10;
     }
 
     interface ILanguage

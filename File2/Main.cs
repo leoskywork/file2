@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using File2.Common;
@@ -10,9 +11,6 @@ namespace File2
 {
     public partial class Main : Form
     {
-        private const int _UITimeInterval = 1000;
-        private const int _UIMessageOffset = _UITimeInterval + 100;
-
         private ILanguage _language;
         private bool _syncAggregateSourceWithTarget = true;
         private bool _aggregateTargetChangedByAutoSync = false;
@@ -20,6 +18,7 @@ namespace File2
         private string _aggregateTaskKey;
         private TimeRange _aggregateTimes;
         private System.Collections.Concurrent.ConcurrentQueue<Tuple<string, DateTime>> _sizingMessages = new System.Collections.Concurrent.ConcurrentQueue<Tuple<string, DateTime>>();
+        private ManualResetEvent _manualReset;
 
 
         public Main()
@@ -35,7 +34,7 @@ namespace File2
             this.folderBrowserDialogMain.ShowNewFolderButton = true;
             this.folderBrowserDialogMain.RootFolder = Environment.SpecialFolder.MyComputer;
             this.buttonAggregateGo.Enabled = false;
-            this.timerProgress.Interval = 1000;
+            this.timerProgress.Interval = Constants.ProgressUpdateRateInMS;
             this.timerProgress.Tick += TimerProgress_Tick;
             this.timerProgress.Start();
             this.Text = Constants.AppName;
@@ -54,7 +53,7 @@ namespace File2
                     UpdateUIWarningMessage(first.Item1);
                 }
 
-                var utcWithOffset = DateTime.UtcNow.AddMilliseconds(-_UIMessageOffset); //only show most recent messages
+                var utcWithOffset = DateTime.UtcNow.AddMilliseconds(-Constants.UIMessageOffsetInMS); //only show most recent messages
 
                 while (!_sizingMessages.IsEmpty)
                 {
@@ -72,10 +71,22 @@ namespace File2
                     }
                 }
             }
+
+            if (_manualReset != null && _sizingMessages.IsEmpty)
+            {
+                UpdateUIWarningMessage("done");
+                _manualReset.Set();
+                _manualReset = null;
+            }
         }
 
         private void ButtonAggregateSource_Click(object sender, EventArgs e)
         {
+            if (!string.IsNullOrEmpty(this.folderBrowserDialogMain.SelectedPath))
+            {
+                //todo: scroll to it, ref https://blog.csdn.net/weixin_43145361/article/details/91350783
+            }
+
             if (this.folderBrowserDialogMain.ShowDialog() == DialogResult.OK)
             {
                 this.buttonAggregateGo.Enabled = true;
@@ -226,11 +237,12 @@ namespace File2
         {
             if (this.InvokeRequired)
             {
-                this.BeginInvoke(new Action<string>(UpdateUIWarningMessage), message);
+                this.BeginInvoke((Action<string>)UpdateUIWarningMessage, message);
             }
             else
             {
                 this.labelAggregateMessage.Text = message;
+                DebugLine("updating msg: " + message);
             }
         }
 
@@ -295,12 +307,14 @@ namespace File2
                 }
 
                 this.buttonFolderInfo.Enabled = false;
+                this.checkBoxAutoOpen.Enabled = false;
                 // UpdateUIWarningMessage("Please run with admin permission accordingly.");
 
                 if (string.IsNullOrWhiteSpace(this.textBoxAggregateSource.Text))
                 {
                     this.labelAggregateMessage.Text = "Please select a source folder";
                     this.buttonFolderInfo.Enabled = true;
+                    this.checkBoxAutoOpen.Enabled = true;
                     return;
                 }
 
@@ -308,6 +322,7 @@ namespace File2
                 {
                     this.labelAggregateMessage.Text = "Source folder not exist";
                     this.buttonFolderInfo.Enabled = true;
+                    this.checkBoxAutoOpen.Enabled = true;
                     return;
                 }
 
@@ -325,17 +340,52 @@ namespace File2
                     else
                     {
                         var timestamp = DateTime.Now.ToString("yyMMdd-HHmmss");
-                        var lines = fileTask.Task.Result.FilesAndSizes.Select(r => r.Item1 + ", " + r.Item2.ToFriendlyFileSize()).ToArray();
-                        File.WriteAllLines($"{Environment.CurrentDirectory}/sizing-{timestamp}.txt", lines);
+                        var lines = fileTask.Task.Result.FilesAndSizes.Select(r => r.Item1 + ", " + r.Item2.ToFriendlyFileSize()).ToList();
+                        lines.Add(Environment.NewLine);
+                        lines.Add("--------- source: " + folder);
+                        lines.Add("--- file scanned: " + fileTask.Task.Result.FilesAndSizes.Count.ToString("#,###"));
+                        lines.Add("----- total size: " + fileTask.Task.Result.FilesAndSizes.Sum(item => item.Item2).ToFriendlyFileSize());
+                        lines.Add("-- error occured: " + fileTask.Task.Result.Errors.Count.ToString());
 
-                        if (fileTask.Task.Result.Errors.Count > 0)
+                        string resultPrefix = $"{Environment.CurrentDirectory}\\sizing-{timestamp}";
+                        string resultFilePath = resultPrefix + ".txt";
+                        string errorFilePath = resultPrefix + "-error.txt";
+
+                        File.WriteAllLines(resultFilePath, lines);
+                        bool hasError = fileTask.Task.Result.Errors.Count > 0;
+
+                        if (hasError)
                         {
-                            var errors = fileTask.Task.Result.Errors.Select(ex => ex.Message);
-                            File.WriteAllLines($"{Environment.CurrentDirectory}/sizing-{timestamp}-error.txt", errors);
+                            File.WriteAllLines(errorFilePath, fileTask.Task.Result.Errors.Select(ex => ex.Message));
                         }
+
+                        DebugLine("going to show msg box, file count: " + fileTask.Task.Result.FilesAndSizes.Count);
+                        if (_sizingMessages.Count > 0)
+                        {
+                            DebugLine("msg remaining: " + _sizingMessages.Count);
+                        }
+
+
+                        _manualReset = new ManualResetEvent(false);
+                        System.Threading.ThreadPool.QueueUserWorkItem(__ =>
+                        {
+                            // not working, use ManualResetEvent instead
+                            // while(_sizingMessages.Count > 0)
+                            // {
+                            // DebugLine("waiting, msg remaining: " + _sizingMessages.Count);
+                            // System.Threading.Thread.Sleep(100);
+                            // DebugLine("waiting end, msg remaining: " + _sizingMessages.Count);
+                            //}
+
+                            WaitHandle.WaitAll(new WaitHandle[] { _manualReset });
+                            DebugLine("waiting end, msg remaining: " + _sizingMessages.Count);
+
+                            AfterSizingDelay(hasError, resultFilePath, errorFilePath);
+                        });
                     }
 
                     this.buttonFolderInfo.Enabled = true;
+                    this.checkBoxAutoOpen.Enabled = true;
                 }, TaskScheduler.FromCurrentSynchronizationContext());
 
                 fileTask.Task.Start();
@@ -344,6 +394,35 @@ namespace File2
             {
                 MessageBox.Show("Failed to get folder info due to：" + ex.ToString());
                 this.buttonFolderInfo.Enabled = true;
+                this.checkBoxAutoOpen.Enabled = true;
+            }
+        }
+
+        private static void DebugLine(string line)
+        {
+            System.Diagnostics.Debug.WriteLine($"----------> {System.Threading.Thread.CurrentThread.ManagedThreadId:##}: " + line);
+        }
+
+        private void AfterSizingDelay(bool hasError, string resultFilePath, string errorFilePath)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke((Action<bool,string,string>)AfterSizingDelay, hasError, resultFilePath, errorFilePath);
+            }
+            else
+            {
+                if (this.checkBoxAutoOpen.Checked)
+                {
+                    System.Diagnostics.Process.Start(resultFilePath);
+                    if (hasError)
+                    {
+                        System.Diagnostics.Process.Start(errorFilePath);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show($"Result saved to {resultFilePath}{(hasError ? ", error saved to " + errorFilePath : "")}");
+                }
             }
         }
 

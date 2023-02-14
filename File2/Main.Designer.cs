@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageMain = new System.Windows.Forms.TabPage();
+            this.buttonFolderInfo = new System.Windows.Forms.Button();
             this.buttonAggregateAbort = new System.Windows.Forms.Button();
             this.buttonAggregateCancel = new System.Windows.Forms.Button();
             this.groupBoxAggregate = new System.Windows.Forms.GroupBox();
@@ -44,10 +45,13 @@
             this.tabPageSetting = new System.Windows.Forms.TabPage();
             this.folderBrowserDialogMain = new System.Windows.Forms.FolderBrowserDialog();
             this.timerProgress = new System.Windows.Forms.Timer(this.components);
-            this.buttonFolderInfo = new System.Windows.Forms.Button();
+            this.checkBoxAutoOpen = new System.Windows.Forms.CheckBox();
+            this.groupBoxSizing = new System.Windows.Forms.GroupBox();
+            this.labelAdminRight = new System.Windows.Forms.Label();
             this.tabControlMain.SuspendLayout();
             this.tabPageMain.SuspendLayout();
             this.groupBoxAggregate.SuspendLayout();
+            this.groupBoxSizing.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControlMain
@@ -63,7 +67,8 @@
             // 
             // tabPageMain
             // 
-            this.tabPageMain.Controls.Add(this.buttonFolderInfo);
+            this.tabPageMain.Controls.Add(this.labelAdminRight);
+            this.tabPageMain.Controls.Add(this.groupBoxSizing);
             this.tabPageMain.Controls.Add(this.buttonAggregateAbort);
             this.tabPageMain.Controls.Add(this.buttonAggregateCancel);
             this.tabPageMain.Controls.Add(this.groupBoxAggregate);
@@ -74,6 +79,16 @@
             this.tabPageMain.TabIndex = 0;
             this.tabPageMain.Text = "Home";
             this.tabPageMain.UseVisualStyleBackColor = true;
+            // 
+            // buttonFolderInfo
+            // 
+            this.buttonFolderInfo.Location = new System.Drawing.Point(53, 74);
+            this.buttonFolderInfo.Name = "buttonFolderInfo";
+            this.buttonFolderInfo.Size = new System.Drawing.Size(105, 25);
+            this.buttonFolderInfo.TabIndex = 7;
+            this.buttonFolderInfo.Text = "Get size";
+            this.buttonFolderInfo.UseVisualStyleBackColor = true;
+            this.buttonFolderInfo.Click += new System.EventHandler(this.buttonFolderInfo_Click);
             // 
             // buttonAggregateAbort
             // 
@@ -91,6 +106,7 @@
             // 
             this.buttonAggregateCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonAggregateCancel.Enabled = false;
+            this.buttonAggregateCancel.ForeColor = System.Drawing.Color.Red;
             this.buttonAggregateCancel.Location = new System.Drawing.Point(660, 161);
             this.buttonAggregateCancel.Name = "buttonAggregateCancel";
             this.buttonAggregateCancel.Size = new System.Drawing.Size(105, 25);
@@ -125,7 +141,7 @@
             this.labelAggregateMessage.ForeColor = System.Drawing.Color.Red;
             this.labelAggregateMessage.Location = new System.Drawing.Point(2, 102);
             this.labelAggregateMessage.Name = "labelAggregateMessage";
-            this.labelAggregateMessage.Size = new System.Drawing.Size(149, 19);
+            this.labelAggregateMessage.Size = new System.Drawing.Size(134, 18);
             this.labelAggregateMessage.TabIndex = 5;
             this.labelAggregateMessage.Text = "Invalid source";
             // 
@@ -136,7 +152,7 @@
             this.buttonAggregateGo.Name = "buttonAggregateGo";
             this.buttonAggregateGo.Size = new System.Drawing.Size(105, 25);
             this.buttonAggregateGo.TabIndex = 4;
-            this.buttonAggregateGo.Text = "Go";
+            this.buttonAggregateGo.Text = "Run";
             this.buttonAggregateGo.UseVisualStyleBackColor = true;
             this.buttonAggregateGo.Click += new System.EventHandler(this.ButtonAggregateGo_Click);
             // 
@@ -194,15 +210,38 @@
             this.tabPageSetting.Text = "Setting";
             this.tabPageSetting.UseVisualStyleBackColor = true;
             // 
-            // buttonFolderInfo
+            // checkBoxAutoOpen
             // 
-            this.buttonFolderInfo.Location = new System.Drawing.Point(660, 246);
-            this.buttonFolderInfo.Name = "buttonFolderInfo";
-            this.buttonFolderInfo.Size = new System.Drawing.Size(105, 25);
-            this.buttonFolderInfo.TabIndex = 7;
-            this.buttonFolderInfo.Text = "Get size";
-            this.buttonFolderInfo.UseVisualStyleBackColor = true;
-            this.buttonFolderInfo.Click += new System.EventHandler(this.buttonFolderInfo_Click);
+            this.checkBoxAutoOpen.AutoSize = true;
+            this.checkBoxAutoOpen.Checked = true;
+            this.checkBoxAutoOpen.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxAutoOpen.Location = new System.Drawing.Point(35, 38);
+            this.checkBoxAutoOpen.Name = "checkBoxAutoOpen";
+            this.checkBoxAutoOpen.Size = new System.Drawing.Size(157, 19);
+            this.checkBoxAutoOpen.TabIndex = 8;
+            this.checkBoxAutoOpen.Text = "Auto show result";
+            this.checkBoxAutoOpen.UseVisualStyleBackColor = true;
+            // 
+            // groupBoxSizing
+            // 
+            this.groupBoxSizing.Controls.Add(this.checkBoxAutoOpen);
+            this.groupBoxSizing.Controls.Add(this.buttonFolderInfo);
+            this.groupBoxSizing.Location = new System.Drawing.Point(549, 207);
+            this.groupBoxSizing.Name = "groupBoxSizing";
+            this.groupBoxSizing.Size = new System.Drawing.Size(216, 126);
+            this.groupBoxSizing.TabIndex = 9;
+            this.groupBoxSizing.TabStop = false;
+            this.groupBoxSizing.Text = "Sizing files";
+            // 
+            // labelAdminRight
+            // 
+            this.labelAdminRight.AutoSize = true;
+            this.labelAdminRight.ForeColor = System.Drawing.Color.Red;
+            this.labelAdminRight.Location = new System.Drawing.Point(446, 369);
+            this.labelAdminRight.Name = "labelAdminRight";
+            this.labelAdminRight.Size = new System.Drawing.Size(319, 15);
+            this.labelAdminRight.TabIndex = 10;
+            this.labelAdminRight.Text = "Run as admin if got access denied error";
             // 
             // Main
             // 
@@ -219,8 +258,11 @@
             this.Load += new System.EventHandler(this.Main_Load);
             this.tabControlMain.ResumeLayout(false);
             this.tabPageMain.ResumeLayout(false);
+            this.tabPageMain.PerformLayout();
             this.groupBoxAggregate.ResumeLayout(false);
             this.groupBoxAggregate.PerformLayout();
+            this.groupBoxSizing.ResumeLayout(false);
+            this.groupBoxSizing.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -242,6 +284,9 @@
         private System.Windows.Forms.Timer timerProgress;
         private System.Windows.Forms.Button buttonAggregateAbort;
         private System.Windows.Forms.Button buttonFolderInfo;
+        private System.Windows.Forms.GroupBox groupBoxSizing;
+        private System.Windows.Forms.CheckBox checkBoxAutoOpen;
+        private System.Windows.Forms.Label labelAdminRight;
     }
 }
 
