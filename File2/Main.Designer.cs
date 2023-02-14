@@ -32,6 +32,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageMain = new System.Windows.Forms.TabPage();
+            this.labelAdminRight = new System.Windows.Forms.Label();
+            this.groupBoxSizing = new System.Windows.Forms.GroupBox();
+            this.checkBoxAutoOpen = new System.Windows.Forms.CheckBox();
             this.buttonFolderInfo = new System.Windows.Forms.Button();
             this.buttonAggregateAbort = new System.Windows.Forms.Button();
             this.buttonAggregateCancel = new System.Windows.Forms.Button();
@@ -45,13 +48,12 @@
             this.tabPageSetting = new System.Windows.Forms.TabPage();
             this.folderBrowserDialogMain = new System.Windows.Forms.FolderBrowserDialog();
             this.timerProgress = new System.Windows.Forms.Timer(this.components);
-            this.checkBoxAutoOpen = new System.Windows.Forms.CheckBox();
-            this.groupBoxSizing = new System.Windows.Forms.GroupBox();
-            this.labelAdminRight = new System.Windows.Forms.Label();
+            this.richTextBoxReadme = new System.Windows.Forms.RichTextBox();
             this.tabControlMain.SuspendLayout();
             this.tabPageMain.SuspendLayout();
-            this.groupBoxAggregate.SuspendLayout();
             this.groupBoxSizing.SuspendLayout();
+            this.groupBoxAggregate.SuspendLayout();
+            this.tabPageSetting.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControlMain
@@ -79,6 +81,39 @@
             this.tabPageMain.TabIndex = 0;
             this.tabPageMain.Text = "Home";
             this.tabPageMain.UseVisualStyleBackColor = true;
+            // 
+            // labelAdminRight
+            // 
+            this.labelAdminRight.AutoSize = true;
+            this.labelAdminRight.ForeColor = System.Drawing.Color.Red;
+            this.labelAdminRight.Location = new System.Drawing.Point(446, 369);
+            this.labelAdminRight.Name = "labelAdminRight";
+            this.labelAdminRight.Size = new System.Drawing.Size(319, 15);
+            this.labelAdminRight.TabIndex = 10;
+            this.labelAdminRight.Text = "Run as admin if got access denied error";
+            // 
+            // groupBoxSizing
+            // 
+            this.groupBoxSizing.Controls.Add(this.checkBoxAutoOpen);
+            this.groupBoxSizing.Controls.Add(this.buttonFolderInfo);
+            this.groupBoxSizing.Location = new System.Drawing.Point(549, 207);
+            this.groupBoxSizing.Name = "groupBoxSizing";
+            this.groupBoxSizing.Size = new System.Drawing.Size(216, 126);
+            this.groupBoxSizing.TabIndex = 9;
+            this.groupBoxSizing.TabStop = false;
+            this.groupBoxSizing.Text = "Sizing files";
+            // 
+            // checkBoxAutoOpen
+            // 
+            this.checkBoxAutoOpen.AutoSize = true;
+            this.checkBoxAutoOpen.Checked = true;
+            this.checkBoxAutoOpen.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxAutoOpen.Location = new System.Drawing.Point(35, 38);
+            this.checkBoxAutoOpen.Name = "checkBoxAutoOpen";
+            this.checkBoxAutoOpen.Size = new System.Drawing.Size(157, 19);
+            this.checkBoxAutoOpen.TabIndex = 8;
+            this.checkBoxAutoOpen.Text = "Auto show result";
+            this.checkBoxAutoOpen.UseVisualStyleBackColor = true;
             // 
             // buttonFolderInfo
             // 
@@ -202,6 +237,7 @@
             // 
             // tabPageSetting
             // 
+            this.tabPageSetting.Controls.Add(this.richTextBoxReadme);
             this.tabPageSetting.Location = new System.Drawing.Point(4, 25);
             this.tabPageSetting.Name = "tabPageSetting";
             this.tabPageSetting.Padding = new System.Windows.Forms.Padding(3);
@@ -210,38 +246,14 @@
             this.tabPageSetting.Text = "Setting";
             this.tabPageSetting.UseVisualStyleBackColor = true;
             // 
-            // checkBoxAutoOpen
+            // richTextBoxReadme
             // 
-            this.checkBoxAutoOpen.AutoSize = true;
-            this.checkBoxAutoOpen.Checked = true;
-            this.checkBoxAutoOpen.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxAutoOpen.Location = new System.Drawing.Point(35, 38);
-            this.checkBoxAutoOpen.Name = "checkBoxAutoOpen";
-            this.checkBoxAutoOpen.Size = new System.Drawing.Size(157, 19);
-            this.checkBoxAutoOpen.TabIndex = 8;
-            this.checkBoxAutoOpen.Text = "Auto show result";
-            this.checkBoxAutoOpen.UseVisualStyleBackColor = true;
-            // 
-            // groupBoxSizing
-            // 
-            this.groupBoxSizing.Controls.Add(this.checkBoxAutoOpen);
-            this.groupBoxSizing.Controls.Add(this.buttonFolderInfo);
-            this.groupBoxSizing.Location = new System.Drawing.Point(549, 207);
-            this.groupBoxSizing.Name = "groupBoxSizing";
-            this.groupBoxSizing.Size = new System.Drawing.Size(216, 126);
-            this.groupBoxSizing.TabIndex = 9;
-            this.groupBoxSizing.TabStop = false;
-            this.groupBoxSizing.Text = "Sizing files";
-            // 
-            // labelAdminRight
-            // 
-            this.labelAdminRight.AutoSize = true;
-            this.labelAdminRight.ForeColor = System.Drawing.Color.Red;
-            this.labelAdminRight.Location = new System.Drawing.Point(446, 369);
-            this.labelAdminRight.Name = "labelAdminRight";
-            this.labelAdminRight.Size = new System.Drawing.Size(319, 15);
-            this.labelAdminRight.TabIndex = 10;
-            this.labelAdminRight.Text = "Run as admin if got access denied error";
+            this.richTextBoxReadme.Dock = System.Windows.Forms.DockStyle.Left;
+            this.richTextBoxReadme.Location = new System.Drawing.Point(3, 3);
+            this.richTextBoxReadme.Name = "richTextBoxReadme";
+            this.richTextBoxReadme.Size = new System.Drawing.Size(457, 418);
+            this.richTextBoxReadme.TabIndex = 0;
+            this.richTextBoxReadme.Text = "";
             // 
             // Main
             // 
@@ -259,10 +271,11 @@
             this.tabControlMain.ResumeLayout(false);
             this.tabPageMain.ResumeLayout(false);
             this.tabPageMain.PerformLayout();
-            this.groupBoxAggregate.ResumeLayout(false);
-            this.groupBoxAggregate.PerformLayout();
             this.groupBoxSizing.ResumeLayout(false);
             this.groupBoxSizing.PerformLayout();
+            this.groupBoxAggregate.ResumeLayout(false);
+            this.groupBoxAggregate.PerformLayout();
+            this.tabPageSetting.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -287,6 +300,7 @@
         private System.Windows.Forms.GroupBox groupBoxSizing;
         private System.Windows.Forms.CheckBox checkBoxAutoOpen;
         private System.Windows.Forms.Label labelAdminRight;
+        private System.Windows.Forms.RichTextBox richTextBoxReadme;
     }
 }
 

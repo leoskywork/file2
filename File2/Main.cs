@@ -39,6 +39,7 @@ namespace File2
             this.timerProgress.Start();
             this.Text = Constants.AppName;
             //this.labelAggregateMessage.Text = "xxxxx xxx1xxxxxxxxxx2xxxxxxx3xxxxx34xxxxx5xxx6xxxx7xx9";
+            this.richTextBoxReadme.Text = "useful dir\nC:\\Users\n";
         }
 
         private void TimerProgress_Tick(object sender, EventArgs e)
