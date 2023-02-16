@@ -154,17 +154,15 @@ namespace File2
 
                 tryTrackDirectory(path, tokenSource, minSizeByte, progress, result);
 
-                var nullCount = result.FilesAndSizes.Where(i => i == null).ToList();
+                //result.FilesAndSizes.Sort((a, b) => b.Item2 - a.Item2 > 0 ? 1 : -1); //cause null reference error for c/user if not use '>='
+                result.FilesAndSizes.Sort((a, b) => b.Item2 - a.Item2 >= 0 ? 1 : -1);
 
-                if(nullCount.Count > 0)
-                {
-                    result.Errors.Add(new Exception("null item found in result.FilesAndSizes, count: " + nullCount.Count));
-                    result.FilesAndSizes.RemoveAll(f => f == null);
-                }
-
-
-                //result.FilesAndSizes.Sort((a, b) => b.Item2 - a.Item2 > 0 ? 1 : -1); //fixme, null reference exception?? (when sizing c/user/leo)
-                result.FilesAndSizes.Sort((a, b) => (b?.Item2 ?? 0) - (a?.Item2 ?? 0) > 0 ? 1 : -1);
+                //var nullCount = result.FilesAndSizes.Where(i => i == null).ToList();
+                //if(nullCount.Count > 0)
+                //{
+                //    result.Errors.Add(new Exception("null item found in result.FilesAndSizes, count: " + nullCount.Count));
+                //    result.FilesAndSizes.RemoveAll(f => f == null);
+                //}
 
                 var size = result.FilesAndSizes.Sum(f => f.Item2).ToFriendlyFileSize();
                 progress($"file count: {result.Count:#,###} total size: {size} (size > {minSizeByte.ToFriendlyFileSize()})");
@@ -214,7 +212,7 @@ namespace File2
 
                 var fileInfo = new FileInfo(file);
                 var fileSize = fileInfo.Length;
-                progress($"#{result.Count:#,###} {GetDisplayFileName(fileInfo.Name)}({ fileSize.ToFriendlyFileSize()})");
+                progress($"#{result.Count:#,###} {GetDisplayFileName(fileInfo.Name)}({fileSize.ToFriendlyFileSize()})");
 
                 if (fileSize > minSizeByte)
                 {
@@ -227,5 +225,5 @@ namespace File2
 
     }
 
-   
+
 }
