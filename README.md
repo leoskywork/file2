@@ -1,10 +1,11 @@
 # File2
 
-A tool to help to manipulate files
+A tool to manipulate files
 
 ## features
 
 * aggregate files to one folder
+* scan folder for file size info, so you can clean up disk
 
 ## todo
 
