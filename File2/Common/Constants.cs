@@ -16,6 +16,9 @@
         public static readonly string AppName = "File2";
         public static readonly int ProgressUpdateRateInMS = 200;// 10;//100;//1000;
         public static readonly int UIMessageOffsetInMS = ProgressUpdateRateInMS + 10;
+        public static readonly int TopFolderCount = 100;
+        public static readonly int TopFileCount = 500;
+        public static readonly int TopErrorCount = 100;
     }
 
     interface ILanguage

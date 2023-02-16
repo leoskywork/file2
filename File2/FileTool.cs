@@ -152,7 +152,7 @@ namespace File2
                 //get error with following api when test on c/user/leo, so try to manually loop through
                 //var files = Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories).ToList();
 
-                tryTrackDirectory(path, tokenSource, minSizeByte, progress, result);
+                TryTrackDirectory(path, tokenSource, minSizeByte, progress, result);
 
                 //result.FilesAndSizes.Sort((a, b) => b.Item2 - a.Item2 > 0 ? 1 : -1); //cause null reference error for c/user if not use '>='
                 result.FilesAndSizes.Sort((a, b) => b.Item2 - a.Item2 >= 0 ? 1 : -1);
@@ -173,19 +173,19 @@ namespace File2
             return fileTask;
         }
 
-        private void tryTrackDirectory(string path, CancellationTokenSource token, long minSizeByte, Action<string> progress, SubFolderResult result)
+        private void TryTrackDirectory(string path, CancellationTokenSource token, long minSizeByte, Action<string> progress, SubFolderResult result)
         {
             try
             {
 
                 var firstInnerFiles = Directory.GetFiles(path);
-                trackFileSizes(firstInnerFiles, token, minSizeByte, progress, result);
+                TrackFileSizes(path, firstInnerFiles, token, minSizeByte, progress, result);
 
                 var firstInnerDirs = Directory.GetDirectories(path);
 
                 foreach (var dir in firstInnerDirs)
                 {
-                    tryTrackDirectory(dir, token, minSizeByte, progress, result);
+                    TryTrackDirectory(dir, token, minSizeByte, progress, result);
                 }
             }
             catch (Exception ex)
@@ -196,7 +196,7 @@ namespace File2
             }
         }
 
-        private void trackFileSizes(string[] files, CancellationTokenSource token, long minSizeByte, Action<string> progress, SubFolderResult result)
+        private void TrackFileSizes(string parent, string[] files, CancellationTokenSource token, long minSizeByte, Action<string> progress, SubFolderResult result)
         {
             foreach (var file in files)
             {
@@ -216,7 +216,7 @@ namespace File2
 
                 if (fileSize > minSizeByte)
                 {
-                    result.FilesAndSizes.Add(Tuple.Create(file, fileSize, result.Count));
+                    result.FilesAndSizes.Add(Tuple.Create(file, fileSize, result.Count, parent));
                 }
 
                 //System.Diagnostics.Debug.WriteLine("---> done " + file);

@@ -9,6 +9,7 @@ A tool to manipulate files
 
 ## todo
 
+* [x] sum up folder size and sort them
 * [x] showing progress message
 * [x] support cancellation for aggregating
   * [x] graceful cancellation

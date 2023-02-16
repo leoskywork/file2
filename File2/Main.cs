@@ -340,14 +340,36 @@ namespace File2
                     }
                     else
                     {
-                        var timestamp = DateTime.Now.ToString("yyMMdd-HHmmss");
-                        var lines = fileTask.Task.Result.FilesAndSizes.Select(r => r.Item1 + ", " + r.Item2.ToFriendlyFileSize()).ToList();
-                        lines.Add(Environment.NewLine);
-                        lines.Add("--------- source: " + folder);
-                        lines.Add("--- file scanned: " + fileTask.Task.Result.FilesAndSizes.Count.ToString("#,###"));
-                        lines.Add("----- total size: " + fileTask.Task.Result.FilesAndSizes.Sum(item => item.Item2).ToFriendlyFileSize());
-                        lines.Add("-- error occured: " + fileTask.Task.Result.Errors.Count.ToString());
+                        int summaryPadding = 20;
+                        int itemPadding = 100;
 
+                        var lines = new List<string>
+                        {
+                            "-- source:".PadRight(summaryPadding) + folder,
+                            "-- file scanned:".PadRight(summaryPadding) + fileTask.Task.Result.FilesAndSizes.Count.ToString("#,###"),
+                            "-- total size:".PadRight(summaryPadding) + fileTask.Task.Result.FilesAndSizes.Sum(item => item.Item2).ToFriendlyFileSize(),
+                            "-- error occured:".PadRight(summaryPadding) + fileTask.Task.Result.Errors.Count.ToString(),
+                            Environment.NewLine,
+                            "-- top folders:",
+                            Environment.NewLine
+                        };
+
+                        var topFolders = fileTask.Task.Result.FilesAndSizes.GroupBy(f => f.Item4).OrderByDescending(g => g.Sum(subFile => subFile.Item2)).Take(Constants.TopFolderCount);
+                        //lines.AddRange(topFolders.Select(f => f.Key.PadRight(itemPadding) + f.Sum(subFile => subFile.Item2).ToFriendlyFileSize()));
+                        lines.AddRange(topFolders.Select(f => $"{f.Key.PadRight(itemPadding)} {f.Sum(subFile => subFile.Item2).ToFriendlyFileSize()}"));
+
+                        lines.AddRange(new List<string>()
+                        {
+                            Environment.NewLine,
+                            "-- top files:",
+                            Environment.NewLine
+                        });
+
+                        var topFiles = fileTask.Task.Result.FilesAndSizes.Take(Constants.TopFileCount);
+                        //lines.AddRange(topFiles.Select(f => f.Item1.PadRight(itemPadding) + f.Item2.ToFriendlyFileSize()));
+                        lines.AddRange(topFiles.Select(f => $"{f.Item1.PadRight(itemPadding)} {f.Item2.ToFriendlyFileSize()}"));
+
+                        var timestamp = DateTime.Now.ToString("yyMMdd-HHmmss");
                         string resultPrefix = $"{Environment.CurrentDirectory}\\sizing-{timestamp}";
                         string resultFilePath = resultPrefix + ".txt";
                         string errorFilePath = resultPrefix + "-error.txt";
@@ -357,7 +379,16 @@ namespace File2
 
                         if (hasError)
                         {
-                            File.WriteAllLines(errorFilePath, fileTask.Task.Result.Errors.Select(ex => ex.Message));
+                            var errorLines = new List<string>();
+
+                            if (fileTask.Task.Result.Errors.Count > Constants.TopErrorCount)
+                            {
+                                errorLines.Add($"got {fileTask.Task.Result.Errors.Count} errors, but only top {Constants.TopErrorCount} will be shown");
+                                errorLines.Add(Environment.NewLine);
+                            }
+
+                            errorLines.AddRange(fileTask.Task.Result.Errors.Take(Constants.TopErrorCount).Select(ex => ex.Message));
+                            File.WriteAllLines(errorFilePath, errorLines);
                         }
 
                         DebugLine("going to show msg box, file count: " + fileTask.Task.Result.FilesAndSizes.Count);

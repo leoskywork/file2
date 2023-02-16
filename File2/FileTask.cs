@@ -42,7 +42,7 @@ namespace File2
 
     class SubFolderResult
     {
-        public List<Tuple<string, long, int>> FilesAndSizes { get; } = new List<Tuple<string, long, int>>();
+        public List<Tuple<string, long, int, string>> FilesAndSizes { get; } = new List<Tuple<string, long, int,string>>();
         public List<Exception> Errors { get; } = new List<Exception>();
         public int Count { get; set; }
     }
