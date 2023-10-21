@@ -307,23 +307,20 @@ namespace File2
                     this._sizingMessages.TryDequeue(out _);
                 }
 
-                this.buttonFolderInfo.Enabled = false;
-                this.checkBoxAutoOpen.Enabled = false;
+                disableButtons();
                 // UpdateUIWarningMessage("Please run with admin permission accordingly.");
 
                 if (string.IsNullOrWhiteSpace(this.textBoxAggregateSource.Text))
                 {
                     this.labelAggregateMessage.Text = "Please select a source folder";
-                    this.buttonFolderInfo.Enabled = true;
-                    this.checkBoxAutoOpen.Enabled = true;
+                  enableButtons();
                     return;
                 }
 
                 if (!Directory.Exists(this.textBoxAggregateSource.Text))
                 {
                     this.labelAggregateMessage.Text = "Source folder not exist";
-                    this.buttonFolderInfo.Enabled = true;
-                    this.checkBoxAutoOpen.Enabled = true;
+                 enableButtons() ;
                     return;
                 }
 
@@ -416,8 +413,7 @@ namespace File2
                         });
                     }
 
-                    this.buttonFolderInfo.Enabled = true;
-                    this.checkBoxAutoOpen.Enabled = true;
+                    enableButtons();
                 }, TaskScheduler.FromCurrentSynchronizationContext());
 
                 fileTask.Task.Start();
@@ -425,9 +421,26 @@ namespace File2
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to get folder info due to：" + ex.ToString());
-                this.buttonFolderInfo.Enabled = true;
-                this.checkBoxAutoOpen.Enabled = true;
+                enableButtons();
             }
+        }
+
+        private void disableButtons()
+        {
+            this.buttonFolderInfo.Enabled = false;
+            this.checkBoxAutoOpen.Enabled = false;
+            this.buttonAggregateGo.Enabled = false;
+            this.buttonAggregateSource.Enabled = false;
+            this.buttonAggregateTarget.Enabled = false;
+        }
+
+        private void enableButtons()
+        {
+            this.buttonFolderInfo.Enabled = true;
+            this.checkBoxAutoOpen.Enabled = true;
+            this.buttonAggregateGo.Enabled = true;
+            this.buttonAggregateSource.Enabled = true;
+            this.buttonAggregateTarget.Enabled = true;
         }
 
         private static void DebugLine(string line)
