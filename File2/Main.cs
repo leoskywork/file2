@@ -37,9 +37,9 @@ namespace File2
             this.timerProgress.Interval = Constants.ProgressUpdateRateInMS;
             this.timerProgress.Tick += TimerProgress_Tick;
             this.timerProgress.Start();
-            this.Text = Constants.AppName;
             //this.labelAggregateMessage.Text = "xxxxx xxx1xxxxxxxxxx2xxxxxxx3xxxxx34xxxxx5xxx6xxxx7xx9";
             this.richTextBoxReadme.Text = "useful dir\nC:\\Users\n";
+            this.Text = GetLongAppName();
         }
 
         private void TimerProgress_Tick(object sender, EventArgs e)
@@ -255,7 +255,12 @@ namespace File2
                 aggregatingSpent = (_aggregateTimes.GetCancellationPeriod() ?? _aggregateTimes.GetPeriod()).ToFriendlyString();
             }
 
-            this.Text = Constants.AppName + (aggregatingSpent != null ? (_aggregateTimes.Canceled ? " - aggr cxl " : " - aggregating ") + aggregatingSpent : "");
+            this.Text = GetLongAppName() + (aggregatingSpent != null ? (_aggregateTimes.Canceled ? " - aggr cxl " : " - aggregating ") + aggregatingSpent : "");
+        }
+
+        private string GetLongAppName()
+        {
+            return $"{Constants.AppName} - v{Constants.Version}";
         }
 
         private void ButtonAggregateCancel_Click(object sender, EventArgs e)

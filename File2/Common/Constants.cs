@@ -16,6 +16,9 @@
 
         public const string AppName = "File2";
         public const string AppAsFilePrefix = "file2";
+        public const string Version = "1.0.1";
+
+
         public const int ProgressUpdateRateInMS = 200;// 10;//100;//1000;
         public const int UIMessageOffsetInMS = ProgressUpdateRateInMS + 10;
         public const int TopFolderCount = 100;

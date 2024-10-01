@@ -266,7 +266,6 @@
             this.MinimumSize = new System.Drawing.Size(500, 400);
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "File2";
             this.Load += new System.EventHandler(this.Main_Load);
             this.tabControlMain.ResumeLayout(false);
             this.tabPageMain.ResumeLayout(false);
