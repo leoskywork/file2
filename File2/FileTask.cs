@@ -11,20 +11,26 @@ namespace File2
         private static int _Count = 0;
         private Thread _thread; //for hard cancel
 
-        public Task<T> Task { get; }
-        public CancellationTokenSource TokenSource { get; }
+        private Task<T> _Task;
+        private DateTime _StartTime;
+        private DateTime _FirstTaskEndTime;
+
+        public CancellationTokenSource TokenSource { get; private set; }
         public string Key { get; }
 
-       
+        public T Result { get { return _Task.Result; } }
+        public AggregateException Exception { get { return _Task.Exception; } }
+        public TaskStatus Status { get { return _Task.Status; } }
 
+        public TimeSpan FirstTaskSpent { get { return _FirstTaskEndTime - _StartTime; } }
 
-        public FileTask(Func<T> function, CancellationTokenSource source, string name)
+        public FileTask(Func<T> function, CancellationTokenSource source, string namePrefix)
         {
             _Count++;
-            this.Key = $"{name}{_Count}_{Guid.NewGuid()}";
+            this.Key = $"{namePrefix}{_Count}_{Guid.NewGuid()}";
 
             this.TokenSource = source;
-            this.Task = new Task<T>(() =>
+            this._Task = new Task<T>(() =>
             {
                 _thread = Thread.CurrentThread;
                 return function();
@@ -34,10 +40,45 @@ namespace File2
 
         public void Dispose()
         {
-            this.Task?.Dispose();
+            this._Task?.Dispose();
+            this._Task = null;
             this.TokenSource.Dispose();
+            this.TokenSource = null;
             _thread = null;
         }
+
+        public void Start()
+        {
+            this._Task.Start();
+            this._StartTime = DateTime.Now;
+        }
+
+        public Task ContinueWith(Action<Task<T>> action, TaskScheduler scheduler)
+        {
+            return this._Task.ContinueWith((preTask) =>
+            {
+                this._FirstTaskEndTime = DateTime.Now;
+                action(preTask);
+            }, scheduler);
+        }
+
+        public string GetUserFriendlySpent()
+        {
+            var spent = (int)this.FirstTaskSpent.TotalSeconds;
+
+            if (spent < 1)
+            {
+                return "1s";
+            }
+
+            if (spent <= 60)
+            {
+                return $"{spent}s";
+            }
+
+            return $"{spent / 60}min{spent % 60}s";
+        }
+       
     }
 
     class SubFolderResult

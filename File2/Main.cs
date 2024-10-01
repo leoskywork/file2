@@ -138,7 +138,7 @@ namespace File2
                     return;
                 }
 
-                if(this.textBoxAggregateSource.Text == this.textBoxAggregateTarget.Text)
+                if (this.textBoxAggregateSource.Text == this.textBoxAggregateTarget.Text)
                 {
                     this.labelAggregateMessage.Text = "Target folder is the same as source";
                     return;
@@ -175,10 +175,10 @@ namespace File2
                 var fileTask = _fileTool.AggregateFileAsync(source, target, (message) => UpdateUIWarningMessage(message));
                 _aggregateTaskKey = fileTask.Key;
 
-                fileTask.Task.ContinueWith((_) =>
+                fileTask.ContinueWith((_) =>
                 {
                     _aggregateTimes.End = DateTime.UtcNow;
-                    this.labelAggregateMessage.Text = fileTask.Task.Result;
+                    this.labelAggregateMessage.Text = fileTask.Result;
                     this.groupBoxAggregate.Enabled = true;
                     this.buttonAggregateGo.Enabled = true;
                     this.buttonAggregateCancel.Enabled = false;
@@ -186,7 +186,7 @@ namespace File2
                     _fileTool.Cleanup(_aggregateTaskKey);
                 }, TaskScheduler.FromCurrentSynchronizationContext());
 
-                fileTask.Task.Start();
+                fileTask.Start();
                 _aggregateTimes = new TimeRange();
                 this.timerProgress.Start();
                 UpdateUIStopwatch();
@@ -302,56 +302,57 @@ namespace File2
         {
             try
             {
-                while(!_sizingMessages.IsEmpty)
+                while (!_sizingMessages.IsEmpty)
                 {
                     this._sizingMessages.TryDequeue(out _);
                 }
 
-                disableButtons();
+                disableButtonsAndInput();
                 // UpdateUIWarningMessage("Please run with admin permission accordingly.");
 
                 if (string.IsNullOrWhiteSpace(this.textBoxAggregateSource.Text))
                 {
                     this.labelAggregateMessage.Text = "Please select a source folder";
-                  enableButtons();
+                    enableButtonsAndInput();
                     return;
                 }
 
                 if (!Directory.Exists(this.textBoxAggregateSource.Text))
                 {
                     this.labelAggregateMessage.Text = "Source folder not exist";
-                 enableButtons() ;
+                    enableButtonsAndInput();
                     return;
                 }
 
                 var folder = this.textBoxAggregateSource.Text;
-                var fileTask = new FileTool().GetSubFolderInfoAsync(folder, 0 * 1024 * 1024 , SizingProgress);
+                var fileTask = new FileTool().GetSubFolderInfoAsync(folder, 0 * 1024 * 1024, SizingProgress);
 
-                fileTask.Task.ContinueWith(_ =>
+                fileTask.ContinueWith(_ =>
                 {
-                    if (fileTask.Task.Exception != null)
+                    if (fileTask.Exception != null)
                     {
                         //fixme: seems can not be catch by outside
                         //throw fileTask.Task.Exception;
-                        MessageBox.Show("Error while sizing folder：" + string.Join(",", fileTask.Task.Exception.InnerExceptions.Select(ex => ex.Message)));
+                        MessageBox.Show("Error while sizing folder：" + string.Join(",", fileTask.Exception.InnerExceptions.Select(ex => ex.Message)));
                     }
                     else
                     {
-                        int summaryPadding = 20;
+                        int summaryPadding = 40;
                         int itemPadding = 100;
 
                         var lines = new List<string>
                         {
                             "-- source:".PadRight(summaryPadding) + folder,
-                            "-- file scanned:".PadRight(summaryPadding) + fileTask.Task.Result.FilesAndSizes.Count.ToString("#,###"),
-                            "-- total size:".PadRight(summaryPadding) + fileTask.Task.Result.FilesAndSizes.Sum(item => item.Item2).ToFriendlyFileSize(),
-                            "-- error occured:".PadRight(summaryPadding) + fileTask.Task.Result.Errors.Count.ToString(),
+                            "-- file scanned:".PadRight(summaryPadding) + fileTask.Result.FilesAndSizes.Count.ToString("#,###"),
+                            "-- total size:".PadRight(summaryPadding) + fileTask.Result.FilesAndSizes.Sum(item => item.Item2).ToFriendlyFileSize(),
+                            "-- error occurred:".PadRight(summaryPadding) + fileTask.Result.Errors.Count.ToString(),
+                            "-- time spent:".PadRight(summaryPadding) + fileTask.GetUserFriendlySpent(),
                             Environment.NewLine,
                             "-- top folders:",
                             Environment.NewLine
                         };
 
-                        var topFolders = fileTask.Task.Result.FilesAndSizes.GroupBy(f => f.Item4).OrderByDescending(g => g.Sum(subFile => subFile.Item2)).Take(Constants.TopFolderCount);
+                        var topFolders = fileTask.Result.FilesAndSizes.GroupBy(f => f.Item4).OrderByDescending(g => g.Sum(subFile => subFile.Item2)).Take(Constants.TopFolderCount);
                         //lines.AddRange(topFolders.Select(f => f.Key.PadRight(itemPadding) + f.Sum(subFile => subFile.Item2).ToFriendlyFileSize()));
                         lines.AddRange(topFolders.Select(f => $"{f.Key.PadRight(itemPadding)} {f.Sum(subFile => subFile.Item2).ToFriendlyFileSize()}"));
 
@@ -362,33 +363,32 @@ namespace File2
                             Environment.NewLine
                         });
 
-                        var topFiles = fileTask.Task.Result.FilesAndSizes.Take(Constants.TopFileCount);
+                        var topFiles = fileTask.Result.FilesAndSizes.Take(Constants.TopFileCount);
                         //lines.AddRange(topFiles.Select(f => f.Item1.PadRight(itemPadding) + f.Item2.ToFriendlyFileSize()));
                         lines.AddRange(topFiles.Select(f => $"{f.Item1.PadRight(itemPadding)} {f.Item2.ToFriendlyFileSize()}"));
 
                         var timestamp = DateTime.Now.ToString("yyMMdd-HHmmss");
-                        string resultPrefix = $"{Environment.CurrentDirectory}\\sizing-{timestamp}";
-                        string resultFilePath = resultPrefix + ".txt";
-                        string errorFilePath = resultPrefix + "-error.txt";
+                        string resultFilePath = $"{Environment.CurrentDirectory}\\{Constants.AppAsFilePrefix}-sizing-{timestamp}.txt";
+                        string errorFilePath = $"{Environment.CurrentDirectory}\\{Constants.AppAsFilePrefix}-{timestamp}-error.txt";
 
                         File.WriteAllLines(resultFilePath, lines);
-                        bool hasError = fileTask.Task.Result.Errors.Count > 0;
+                        bool hasError = fileTask.Result.Errors.Count > 0;
 
                         if (hasError)
                         {
                             var errorLines = new List<string>();
 
-                            if (fileTask.Task.Result.Errors.Count > Constants.TopErrorCount)
+                            if (fileTask.Result.Errors.Count > Constants.TopErrorCount)
                             {
-                                errorLines.Add($"got {fileTask.Task.Result.Errors.Count} errors, but only top {Constants.TopErrorCount} will be shown");
+                                errorLines.Add($"got {fileTask.Result.Errors.Count} errors, but only top {Constants.TopErrorCount} will be shown");
                                 errorLines.Add(Environment.NewLine);
                             }
 
-                            errorLines.AddRange(fileTask.Task.Result.Errors.Take(Constants.TopErrorCount).Select(ex => ex.Message));
+                            errorLines.AddRange(fileTask.Result.Errors.Take(Constants.TopErrorCount).Select(ex => ex.Message));
                             File.WriteAllLines(errorFilePath, errorLines);
                         }
 
-                        DebugLine("going to show msg box, file count: " + fileTask.Task.Result.FilesAndSizes.Count);
+                        DebugLine("going to show msg box, file count: " + fileTask.Result.FilesAndSizes.Count);
                         if (_sizingMessages.Count > 0)
                         {
                             DebugLine("msg remaining: " + _sizingMessages.Count);
@@ -413,34 +413,40 @@ namespace File2
                         });
                     }
 
-                    enableButtons();
+                    enableButtonsAndInput();
                 }, TaskScheduler.FromCurrentSynchronizationContext());
 
-                fileTask.Task.Start();
+                fileTask.Start();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to get folder info due to：" + ex.ToString());
-                enableButtons();
+                enableButtonsAndInput();
             }
         }
 
-        private void disableButtons()
+        private void disableButtonsAndInput()
         {
             this.buttonFolderInfo.Enabled = false;
             this.checkBoxAutoOpen.Enabled = false;
             this.buttonAggregateGo.Enabled = false;
             this.buttonAggregateSource.Enabled = false;
             this.buttonAggregateTarget.Enabled = false;
+
+            this.textBoxAggregateSource.Enabled = false;
+            this.textBoxAggregateTarget.Enabled = false;
         }
 
-        private void enableButtons()
+        private void enableButtonsAndInput()
         {
             this.buttonFolderInfo.Enabled = true;
             this.checkBoxAutoOpen.Enabled = true;
             this.buttonAggregateGo.Enabled = true;
             this.buttonAggregateSource.Enabled = true;
             this.buttonAggregateTarget.Enabled = true;
+
+            this.textBoxAggregateSource.Enabled = true;
+            this.textBoxAggregateTarget.Enabled = true;
         }
 
         private static void DebugLine(string line)
@@ -452,7 +458,7 @@ namespace File2
         {
             if (this.InvokeRequired)
             {
-                this.BeginInvoke((Action<bool,string,string>)AfterSizingDelay, hasError, resultFilePath, errorFilePath);
+                this.BeginInvoke((Action<bool, string, string>)AfterSizingDelay, hasError, resultFilePath, errorFilePath);
             }
             else
             {

@@ -119,7 +119,7 @@ namespace File2
                 fileTask.TokenSource.Token.Register(() => { System.Diagnostics.Debug.WriteLine("abort cxl token callback"); });
                 fileTask.TokenSource.Cancel();
 
-                if (fileTask.Task.Status == TaskStatus.Running)
+                if (fileTask.Status == TaskStatus.Running)
                 {
                     //kill the task or return the task result right now
                     //https://stackoverflow.com/questions/4359910/is-it-possible-to-abort-a-task-like-aborting-a-thread-thread-abort-method
